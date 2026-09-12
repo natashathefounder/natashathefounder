@@ -12,9 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CoachingRouteImport } from './routes/coaching'
 import { Route as CustomRouteImport } from './routes/custom'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MembersRouteImport } from './routes/members'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as StackRouteImport } from './routes/stack'
 import { Route as StudioRouteImport } from './routes/studio'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,6 +32,16 @@ const CoachingRoute = CoachingRouteImport.update({
 const CustomRoute = CustomRouteImport.update({
   id: '/custom',
   path: '/custom',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MembersRoute = MembersRouteImport.update({
+  id: '/members',
+  path: '/members',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -46,48 +59,92 @@ const StudioRoute = StudioRouteImport.update({
   path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/coaching': typeof CoachingRoute
   '/custom': typeof CustomRoute
+  '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/shop': typeof ShopRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/coaching': typeof CoachingRoute
   '/custom': typeof CustomRoute
+  '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/shop': typeof ShopRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/coaching': typeof CoachingRoute
   '/custom': typeof CustomRoute
+  '/login': typeof LoginRoute
+  '/members': typeof MembersRoute
   '/shop': typeof ShopRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/coaching' | '/custom' | '/shop' | '/stack' | '/studio'
+  fullPaths:
+    | '/'
+    | '/coaching'
+    | '/custom'
+    | '/login'
+    | '/members'
+    | '/shop'
+    | '/stack'
+    | '/studio'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/coaching' | '/custom' | '/shop' | '/stack' | '/studio'
+  to:
+    | '/'
+    | '/coaching'
+    | '/custom'
+    | '/login'
+    | '/members'
+    | '/shop'
+    | '/stack'
+    | '/studio'
+    | '/api/auth/$'
   id:
-    '__root__' | '/' | '/coaching' | '/custom' | '/shop' | '/stack' | '/studio'
+    | '__root__'
+    | '/'
+    | '/coaching'
+    | '/custom'
+    | '/login'
+    | '/members'
+    | '/shop'
+    | '/stack'
+    | '/studio'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoachingRoute: typeof CoachingRoute
   CustomRoute: typeof CustomRoute
+  LoginRoute: typeof LoginRoute
+  MembersRoute: typeof MembersRoute
   ShopRoute: typeof ShopRoute
   StackRoute: typeof StackRoute
   StudioRoute: typeof StudioRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -113,6 +170,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CustomRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/members': {
+      id: '/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof MembersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
@@ -134,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -141,9 +219,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoachingRoute: CoachingRoute,
   CustomRoute: CustomRoute,
+  LoginRoute: LoginRoute,
+  MembersRoute: MembersRoute,
   ShopRoute: ShopRoute,
   StackRoute: StackRoute,
   StudioRoute: StudioRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

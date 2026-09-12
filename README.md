@@ -18,6 +18,7 @@ This is the founder app: story, lookbook, charm-stack composer, custom brief, an
 - **Stack** — hoop or bangle, gold or silver, up to eight charms (saved on-device)
 - **Custom** — six-step journey and a brief emailed to the studio
 - **Studio** — appointment note
+- **Members** — approved-account access to private offers, discounts, and premiere events
 
 ## Stack
 

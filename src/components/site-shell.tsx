@@ -11,6 +11,7 @@ const links = [
   { to: "/custom", label: "Custom" },
   { to: "/coaching", label: "Coaching" },
   { to: "/studio", label: "Studio" },
+  { to: "/members", label: "Members" },
 ] as const;
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
@@ -24,7 +25,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       </p>
       <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 md:px-8">
-          <Link to="/" className="font-serif text-xl leading-none tracking-wide" onClick={() => setOpen(false)}>
+          <Link
+            to="/"
+            className="font-serif text-xl leading-none tracking-wide"
+            onClick={() => setOpen(false)}
+          >
             Natasha
             <span className="mt-0.5 block font-sans text-[0.58rem] uppercase tracking-[0.28em] text-muted">
               the founder
@@ -73,10 +78,20 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 {l.label}
               </Link>
             ))}
-            <a href={SHOP} target="_blank" rel="noreferrer" className="flex h-11 items-center font-sans text-sm">
+            <a
+              href={SHOP}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-11 items-center font-sans text-sm"
+            >
               Shop ORA
             </a>
-            <a href={INSTAGRAM_FOUNDER} target="_blank" rel="noreferrer" className="flex h-11 items-center font-sans text-sm">
+            <a
+              href={INSTAGRAM_FOUNDER}
+              target="_blank"
+              rel="noreferrer"
+              className="flex h-11 items-center font-sans text-sm"
+            >
               @natasha.thefounder
             </a>
           </nav>
@@ -88,7 +103,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <div>
             <p className="font-serif text-2xl">Natasha</p>
             <p className="mt-2 max-w-sm text-sm text-muted">
-              Personal house of Natasha Collins, founder of ORA Jewellery. The shop remains at orajewellery.com.
+              Personal house of Natasha Collins, founder of ORA Jewellery. The shop remains at
+              orajewellery.com.
             </p>
           </div>
           <p className="text-xs text-faint">Cape Town · Handmade to last</p>
