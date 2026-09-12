@@ -1,41 +1,89 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { CoachingCheckoutButton } from "@/components/coaching-checkout";
-import { Button } from "@/components/ui/button";
+import { PageIntro } from "@/components/page-intro";
 import { COACHING_PRICE_GBP, EMAIL } from "@/lib/catalog";
-
-export const Route = createFileRoute("/coaching")({ component: CoachingPage });
-
+export const Route = createFileRoute("/coaching")({
+  component: CoachingPage,
+  head: () => ({ meta: [{ title: "Founder to founder — Natasha Collins" }] }),
+});
 function CoachingPage() {
   return (
-    <main className="mx-auto grid max-w-6xl gap-12 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
-      <div>
-        <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">Founder coaching</p>
-        <h1 className="mt-3 font-serif text-title">A session with Natasha. £75.</h1>
-        <p className="mt-4 max-w-xl text-muted">
-          One hour. The numbers, the mistakes, the next move. For founders who are building in public and want a
-          straight conversation from someone still on the bench.
-        </p>
-        <p className="mt-6 font-serif text-5xl tabular-nums">£{COACHING_PRICE_GBP}</p>
-        <p className="mt-2 text-sm text-muted">One-to-one · Paid on Stripe · GBP</p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <CoachingCheckoutButton />
-          <Button variant="ghost" asChild>
-            <a href={`mailto:${EMAIL}?subject=${encodeURIComponent("Founder coaching question")}`}>Write first</a>
-          </Button>
+    <main>
+      <PageIntro
+        number="04"
+        eyebrow="Founder to founder"
+        title={
+          <>
+            Let’s talk about
+            <br />
+            <em>the real thing.</em>
+          </>
+        }
+        description="The business. The decision. The thing you’ve been turning over at 2am. Bring it to the table."
+        image="/media/studio.jpg"
+        caption="From the bench. From experience."
+      />
+      <section className="coaching-body editorial-container">
+        <div>
+          <p className="eyebrow">A session with Natasha</p>
+          <h2>
+            No performance.
+            <br />
+            <em>A proper conversation.</em>
+          </h2>
+          <p>
+            I’m building a business too. This is a space to look honestly at where you are, ask the
+            questions you haven’t found a place for, and work through what comes next.
+          </p>
+          <ol className="conversation-topics">
+            {[
+              [
+                "Bring the knot",
+                "A collection, a business decision, or a direction that no longer feels like yours. Pick the question that matters most.",
+              ],
+              [
+                "Look at it together",
+                "An honest founder perspective on the choices in front of you. Space to think out loud.",
+              ],
+              [
+                "Find your next move",
+                "Leave with a clearer focus for what to work on next. No promise of overnight transformation.",
+              ],
+            ].map(([title, body], i) => (
+              <li key={title}>
+                <span className="eyebrow">0{i + 1}</span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
-      </div>
-      <ul className="space-y-6 self-center border-t border-line pt-6 md:border-t-0 md:border-l md:pl-10 md:pt-0">
-        {[
-          ["The work", "Jewellery house, Shopify, Cape Town studio, stacking a life around a bench."],
-          ["The books", "What actually sold. What stalled. Shown the way she shows it on Instagram."],
-          ["The next move", "A custom brief, a collection, a hire, or the thing you have been avoiding."],
-        ].map(([t, d]) => (
-          <li key={t}>
-            <h2 className="font-serif text-2xl">{t}</h2>
-            <p className="mt-2 text-sm text-muted">{d}</p>
-          </li>
-        ))}
-      </ul>
+        <aside className="session-note">
+          <p className="eyebrow">One to one</p>
+          <h3>
+            Your seat
+            <br />
+            <em>at the table.</em>
+          </h3>
+          <p className="session-price">£{COACHING_PRICE_GBP}</p>
+          <p>One hour · A private founder session</p>
+          <div className="my-7">
+            <CoachingCheckoutButton />
+          </div>
+          <p className="text-xs">
+            Payment is handled securely by Stripe in GBP. Ask about availability and arrangements
+            before paying if you need a particular date.
+          </p>
+          <a
+            href={`mailto:${EMAIL}?subject=${encodeURIComponent("Founder coaching — availability and questions")}`}
+            className="text-link mt-5"
+          >
+            Ask Natasha a question ↗
+          </a>
+        </aside>
+      </section>
     </main>
   );
 }

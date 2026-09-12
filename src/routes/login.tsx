@@ -21,7 +21,7 @@ function LoginPage() {
         </div>
         <div className="flex flex-col justify-center px-7 py-12 md:px-10">
           <SignedOut>
-            <h2 className="font-serif text-3xl">Enter Members</h2>
+            <h2 className="font-serif text-3xl">Enter The Private List</h2>
             <p className="mt-3 mb-7 text-sm text-muted">
               Use your preferred account. Every new membership is personally approved.
             </p>
@@ -36,7 +36,7 @@ function LoginPage() {
               to="/members"
               className="mt-8 inline-flex h-11 items-center justify-center bg-ink px-5 text-xs uppercase tracking-[0.16em] text-paper"
             >
-              Continue to Members
+              Open The Private List
             </Link>
           </SignedIn>
         </div>

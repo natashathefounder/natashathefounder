@@ -22,6 +22,7 @@ type State = {
   setMetal: (metal: Metal) => void;
   toggleCharm: (id: string) => void;
   clearCharms: () => void;
+  moveCharm: (id: string, direction: -1 | 1) => void;
   saveStack: (name: string) => void;
   loadStack: (id: string) => void;
   removeStack: (id: string) => void;
@@ -47,6 +48,14 @@ export const useStackStore = create<State>()(
         if (current.length >= MAX) return;
         set({ charmIds: [...current, id] });
       },
+      moveCharm: (id, direction) => {
+        const ids = [...get().charmIds];
+        const index = ids.indexOf(id),
+          target = index + direction;
+        if (index < 0 || target < 0 || target >= ids.length) return;
+        [ids[index], ids[target]] = [ids[target], ids[index]];
+        set({ charmIds: ids });
+      },
       clearCharms: () => set({ charmIds: [] }),
       saveStack: (name) => {
         const { base, metal, charmIds, saved } = get();
@@ -70,9 +79,8 @@ export const useStackStore = create<State>()(
           charmIds: found.charmIds,
         });
       },
-      removeStack: (id) =>
-        set({ saved: get().saved.filter((s) => s.id !== id) }),
+      removeStack: (id) => set({ saved: get().saved.filter((s) => s.id !== id) }),
     }),
-    { name: "ora-charm-stack" },
+    { name: "ora-charm-stack", skipHydration: true },
   ),
 );

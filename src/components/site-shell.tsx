@@ -1,113 +1,112 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+import { useState, useRef } from "react";
 import { INSTAGRAM_FOUNDER, SHOP } from "@/lib/catalog";
-import { cn } from "@/lib/utils";
 
 const links = [
-  { to: "/", label: "Story" },
-  { to: "/shop", label: "Lookbook" },
-  { to: "/stack", label: "Stack" },
-  { to: "/custom", label: "Custom" },
-  { to: "/coaching", label: "Coaching" },
-  { to: "/studio", label: "Studio" },
-  { to: "/members", label: "Members" },
+  { to: "/", label: "The story" },
+  { to: "/shop", label: "ORA edit" },
+  { to: "/stack", label: "Charm atelier" },
+  { to: "/custom", label: "Made for you" },
+  { to: "/coaching", label: "Founder to founder" },
+  { to: "/studio", label: "The studio" },
+  { to: "/members", label: "The Private List" },
 ] as const;
-
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
-
+  const menuButton = useRef<HTMLButtonElement>(null);
+  const close = () => {
+    setOpen(false);
+    menuButton.current?.focus();
+  };
   return (
-    <div className="min-h-dvh bg-paper text-ink">
-      <p className="bg-cream px-4 py-2 text-center font-sans text-[0.68rem] uppercase tracking-[0.18em] text-ink">
-        Handmade in Cape Town · Founder coaching £75 · Shop at orajewellery.com
-      </p>
-      <header className="sticky top-0 z-30 border-b border-line bg-paper/90 backdrop-blur-md">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 md:px-8">
-          <Link
-            to="/"
-            className="font-serif text-xl leading-none tracking-wide"
-            onClick={() => setOpen(false)}
-          >
-            Natasha
-            <span className="mt-0.5 block font-sans text-[0.58rem] uppercase tracking-[0.28em] text-muted">
-              the founder
-            </span>
+    <div className="site-house">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
+      <header
+        className="house-header"
+        onKeyDown={(e) => {
+          if (e.key === "Escape") close();
+        }}
+      >
+        <div className="header-row">
+          <Link to="/" className="wordmark" onClick={() => setOpen(false)}>
+            Natasha<span>THE FOUNDER</span>
           </Link>
-          <nav className="ml-auto hidden items-center gap-6 md:flex">
-            {links.map((l) => (
-              <Link
-                key={l.to}
-                to={l.to}
-                className={cn(
-                  "font-sans text-sm tracking-wide text-muted transition-colors hover:text-ink",
-                  pathname === l.to && "text-ink",
-                )}
-              >
+          <nav aria-label="Main navigation" className="desktop-nav">
+            {links.slice(0, 6).map((l) => (
+              <Link key={l.to} to={l.to} aria-current={pathname === l.to ? "page" : undefined}>
                 {l.label}
               </Link>
             ))}
           </nav>
-          <a
-            href={SHOP}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-auto hidden h-10 items-center border border-ink px-3 font-sans text-[0.68rem] uppercase tracking-[0.16em] hover:bg-ink hover:text-paper md:ml-4 md:inline-flex"
-          >
-            Shop ORA
-          </a>
+          <Link className="private-nav" to="/members">
+            The Private List <ArrowUpRight size={13} />
+          </Link>
           <button
+            ref={menuButton}
             type="button"
-            className="ml-auto inline-flex h-11 w-11 items-center justify-center md:hidden"
+            className="menu-toggle"
             aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen((v) => !v)}
+            aria-expanded={open}
+            aria-controls="house-menu"
+            onClick={() => setOpen(!open)}
           >
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            {open ? <X /> : <Menu />}
           </button>
         </div>
-        {open ? (
-          <nav className="flex flex-col gap-1 border-t border-line px-4 py-4 md:hidden">
-            {links.map((l) => (
+        {open && (
+          <nav id="house-menu" className="mobile-nav" aria-label="Mobile navigation">
+            {links.map((l, i) => (
               <Link
                 key={l.to}
                 to={l.to}
-                className="flex h-11 items-center font-sans text-sm"
+                aria-current={pathname === l.to ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
+                <span>0{i + 1}</span>
                 {l.label}
+                <ArrowUpRight size={18} />
               </Link>
             ))}
-            <a
-              href={SHOP}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-11 items-center font-sans text-sm"
-            >
-              Shop ORA
-            </a>
-            <a
-              href={INSTAGRAM_FOUNDER}
-              target="_blank"
-              rel="noreferrer"
-              className="flex h-11 items-center font-sans text-sm"
-            >
-              @natasha.thefounder
+            <a href={SHOP} target="_blank" rel="noreferrer">
+              Shop ORA ↗
             </a>
           </nav>
-        ) : null}
+        )}
       </header>
-      {children}
-      <footer className="border-t border-line px-4 py-10 md:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div id="main-content" tabIndex={-1}>
+        {children}
+      </div>
+      <footer className="house-footer">
+        <div className="footer-invitation">
+          <p className="eyebrow">This is only the beginning</p>
+          <Link to="/members">
+            A little <em>closer?</em>
+            <ArrowUpRight />
+          </Link>
+          <p>The Private List. New work, private offers and invitations from me.</p>
+        </div>
+        <div className="footer-bottom">
+          <Link to="/" className="wordmark">
+            Natasha<span>THE FOUNDER</span>
+          </Link>
+          <p>
+            Jewellery. Instinct. A life in the making.
+            <br />
+            Natasha Collins · ORA Jewellery
+          </p>
           <div>
-            <p className="font-serif text-2xl">Natasha</p>
-            <p className="mt-2 max-w-sm text-sm text-muted">
-              Personal house of Natasha Collins, founder of ORA Jewellery. The shop remains at
-              orajewellery.com.
-            </p>
+            <a href={INSTAGRAM_FOUNDER} target="_blank" rel="noreferrer">
+              Follow the story ↗
+            </a>
+            <a href={SHOP} target="_blank" rel="noreferrer">
+              Shop ORA ↗
+            </a>
+            <Link to="/studio">Get in touch ↗</Link>
           </div>
-          <p className="text-xs text-faint">Cape Town · Handmade to last</p>
         </div>
       </footer>
     </div>

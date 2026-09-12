@@ -23,7 +23,7 @@ export const useBriefStore = create<State>()(
       setField: (key, value) => set({ [key]: value }),
       reset: () => set(empty),
     }),
-    { name: "ora-custom-brief" },
+    { name: "ora-custom-brief", skipHydration: true },
   ),
 );
 

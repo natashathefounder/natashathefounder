@@ -61,6 +61,7 @@ test("the auth-on workspace globs the schema copy and app migrations", () => {
   assert.deepEqual(pendingMigrations(readdirSync(migrationsDir), []), [
     { name: "0001_auth.sql", path: "0001_auth.sql" },
     { name: "0002_members.sql", path: "0002_members.sql" },
+    { name: "0003_private_list.sql", path: "0003_private_list.sql" },
   ]);
   assert.ok(readdirSync(join(migrationsDir, "auth")).includes("0001_auth.sql"));
 });

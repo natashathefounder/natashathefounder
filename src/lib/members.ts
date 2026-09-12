@@ -1,72 +1,34 @@
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { createServerFn, createMiddleware } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth/middleware";
-import { getSql } from "@/lib/db";
+import { entrySchema, memberStatusSchema } from "@/lib/private-list-schema";
 
-const OWNER_EMAILS = new Set(["me@natashathefounder.com"]);
-
-type MemberRow = {
-  user_id: string;
-  name: string;
-  email: string;
-  status: "pending" | "active" | "paused";
-  role: "member" | "admin";
-  joined_at: string;
-};
-
+const privateAuth = createMiddleware({ type: "function" })
+  .middleware([authMiddleware])
+  .server(async ({ next, context }) => {
+    const { getSessionUser } = await import("@/lib/auth/verify.server");
+    const { setResponseHeader } = await import("@tanstack/react-start/server");
+    setResponseHeader("Cache-Control", "private, no-store");
+    // Require a real session even when the platform's development auth fallback is enabled.
+    const user = await getSessionUser(context.bearerToken);
+    if (!user || user.id !== context.userId) throw new Error("Unauthorized");
+    return next({ context: { userId: user.id } });
+  });
+async function service() {
+  const { getSql } = await import("@/lib/db");
+  const { privateListService } = await import("@/lib/private-list-service.server");
+  return privateListService(await getSql(), process.env.NATASHA_OWNER_USER_ID);
+}
 export const getMembership = createServerFn({ method: "GET" })
-  .middleware([authMiddleware])
-  .handler(async ({ context }) => {
-    const sql = await getSql();
-    const users = await sql<{ id: string; name: string; email: string }>`
-      select id, name, email from "user" where id = ${context.userId} limit 1
-    `;
-    const user = users[0];
-    if (!user) throw new Error("Your account could not be loaded");
-
-    const isOwner = OWNER_EMAILS.has(user.email.toLowerCase());
-    await sql`
-      insert into member_profiles (user_id, status, role, approved_at, approved_by)
-      values (${context.userId}, ${isOwner ? "active" : "pending"}, ${isOwner ? "admin" : "member"}, ${isOwner ? new Date().toISOString() : null}, ${isOwner ? context.userId : null})
-      on conflict (user_id) do update set
-        status = case when ${isOwner} then 'active' else member_profiles.status end,
-        role = case when ${isOwner} then 'admin' else member_profiles.role end
-    `;
-
-    const rows = await sql<MemberRow>`
-      select m.user_id, u.name, u.email, m.status, m.role, m.joined_at
-      from member_profiles m join "user" u on u.id = m.user_id
-      where m.user_id = ${context.userId}
-    `;
-    const membership = rows[0];
-    if (!membership) throw new Error("Membership could not be loaded");
-
-    const pending =
-      membership.role === "admin"
-        ? await sql<MemberRow>`
-          select m.user_id, u.name, u.email, m.status, m.role, m.joined_at
-          from member_profiles m join "user" u on u.id = m.user_id
-          where m.status = 'pending' order by m.joined_at asc
-        `
-        : [];
-    return { membership, pending };
-  });
-
-export const approveMember = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .validator(z.object({ userId: z.string().min(1) }))
-  .handler(async ({ context, data }) => {
-    const sql = await getSql();
-    const admins = await sql<{ role: string; status: string }>`
-      select role, status from member_profiles where user_id = ${context.userId}
-    `;
-    if (admins[0]?.role !== "admin" || admins[0]?.status !== "active") {
-      throw new Error("Administrator access required");
-    }
-    await sql`
-      update member_profiles
-      set status = 'active', approved_at = now(), approved_by = ${context.userId}
-      where user_id = ${data.userId} and status = 'pending'
-    `;
-    return { success: true };
-  });
+  .middleware([privateAuth])
+  .handler(async ({ context }) => (await service()).read(context.userId));
+export const requestMembership = createServerFn({ method: "POST" })
+  .middleware([privateAuth])
+  .handler(async ({ context }) => (await service()).request(context.userId));
+export const updateMember = createServerFn({ method: "POST" })
+  .middleware([privateAuth])
+  .validator(memberStatusSchema)
+  .handler(async ({ context, data }) => (await service()).setStatus(context.userId, data));
+export const saveEntry = createServerFn({ method: "POST" })
+  .middleware([privateAuth])
+  .validator(entrySchema)
+  .handler(async ({ context, data }) => (await service()).save(context.userId, data));
