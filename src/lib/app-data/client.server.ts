@@ -278,7 +278,7 @@ function tokenIdentityKey(token: string): string {
             .digest("base64url");
         }
       }
-    } catch {}
+    } catch { /* Connector cleanup is best effort. */ }
   }
   return createHash("sha256").update(token).digest("base64url");
 }
@@ -425,3 +425,4 @@ export type {
   ConnectorTypeName,
 } from "./types.ts";
 export { isLoginRequired, redirectToLoginIfRequired } from "./login.ts";
+

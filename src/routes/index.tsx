@@ -1,109 +1,213 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { CoachingCheckoutButton } from "@/components/coaching-checkout";
-import { Button } from "@/components/ui/button";
-import { chapters, INSTAGRAM_FOUNDER, SHOP } from "@/lib/catalog";
-
-export const Route = createFileRoute("/")({ component: Home });
-
+import { createFileRoute } from "@tanstack/react-router";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { getCatalogue } from "@/lib/commerce/catalogue";
+import { ProductGrid, CommerceEmpty, Loading } from "@/components/commerce";
+import { pageHead } from "@/lib/seo";
+export const Route = createFileRoute("/")({
+  loader: () => getCatalogue({ data: { sort: "featured" } }),
+  pendingComponent: Loading,
+  head: () =>
+    pageHead(
+      "Natasha The Founder — ORA Jewellery",
+      "An independent house of jewellery, perspective and possibility. Explore ORA Jewellery and the world of Natasha Collins.",
+      "/",
+    ),
+  component: Home,
+});
 function Home() {
+  const { products, collections, unavailable } = Route.useLoaderData();
   return (
     <main>
-      <section className="grid md:grid-cols-2">
-        <div className="flex flex-col justify-center px-6 py-16 md:px-12 md:py-24">
-          <p className="mb-4 font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">
-            Cape Town · Founder & designer
-          </p>
-          <h1 className="font-serif text-display">
-            Natasha
+      <section className="hero">
+        <div className="hero-copy">
+          <p className="eyebrow">THE HOUSE OF NATASHA · ORA JEWELLERY</p>
+          <h1>
+            Never ask
             <br />
-            Collins
+            permission
+            <br />
+            to <i>be.</i>
           </h1>
-          <p className="mt-6 max-w-md text-muted">
-            I made my first piece of jewellery at fifteen. ORA was born from instinct. From saying no to no.
-            From turning gold and silver into something you feel.
+          <p>
+            Wear your story.
+            <br />
+            Question where it begins.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/stack">Build a charm stack</Link>
-            </Button>
-            <CoachingCheckoutButton />
-            <Button variant="ghost" asChild>
-              <a href={SHOP} target="_blank" rel="noreferrer">
-                Open the shop
-              </a>
-            </Button>
-          </div>
+          <a className="button light" href="/shop">
+            Discover ORA <ArrowUpRight size={18} />
+          </a>
+          <a className="hero-scroll" href="#perspective">
+            <ArrowDown size={15} /> A DIFFERENT PERSPECTIVE
+          </a>
         </div>
-        <figure className="relative min-h-[420px]">
+        <figure className="hero-portrait">
           <img
-            src="/media/hoop-charms.jpg"
-            alt="Gold hoop with clip charms on ivory linen"
-            className="h-full w-full object-cover"
+            src="/media/portrait-1080.webp"
+            srcSet="/media/portrait-640.webp 640w, /media/portrait-1080.webp 1080w"
+            sizes="(max-width:700px) 100vw, 53vw"
+            width="1080"
+            height="1440"
+            fetchPriority="high"
+            alt="Editorial portrait of a woman in a checked dress against warm timber"
           />
-          <figcaption className="absolute bottom-4 left-4 font-sans text-[0.7rem] uppercase tracking-[0.16em] text-paper">
-            Worn your way. No permission needed.
-          </figcaption>
+          <figcaption>INDIVIDUALITY IS THE SIGNATURE.</figcaption>
         </figure>
+        <span className="hero-edition">01 / THE ORIGIN EDIT</span>
       </section>
-
-      <section className="bg-cream px-6 py-20 md:px-16">
-        <blockquote className="mx-auto max-w-3xl font-serif text-title italic leading-snug">
-          I do not design for someday. I design for every version of you. Bold. Bruised. Becoming. Here. Now.
-          Always.
-          <cite className="mt-6 block font-sans text-[0.72rem] not-italic uppercase tracking-[0.2em] text-metal">
-            Natasha x
-          </cite>
-        </blockquote>
-      </section>
-
-      <section className="grid grid-cols-2 border-y border-line md:grid-cols-4">
-        {[
-          ["15", "Age she made her first piece"],
-          ["10k+", "ORA pieces sold and counting"],
-          ["24", "Month craftsmanship warranty"],
-          ["CT", "Handmade in Cape Town"],
-        ].map(([k, v]) => (
-          <div key={k} className="border-b border-line px-4 py-8 text-center md:border-b-0 md:border-r md:last:border-r-0">
-            <p className="font-serif text-4xl tabular-nums">{k}</p>
-            <p className="mt-2 text-xs text-muted">{v}</p>
-          </div>
-        ))}
-      </section>
-
-      <section className="px-6 py-20 md:px-12">
-        <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">The story</p>
-        <h2 className="mt-3 max-w-xl font-serif text-title">From a first piece at fifteen to a Cape Town house.</h2>
-        <div className="mt-12 grid gap-10 md:grid-cols-2">
-          {chapters.map((c) => (
-            <article key={c.num}>
-              <p className="font-sans text-[0.7rem] uppercase tracking-[0.2em] text-metal">{c.num}</p>
-              <h3 className="mt-2 font-serif text-3xl">{c.title}</h3>
-              <p className="mt-3 max-w-md text-muted">{c.body}</p>
-            </article>
-          ))}
+      <section id="perspective" className="manifesto section">
+        <div className="section-label">
+          <span className="eyebrow">01 — A question of origin</span>
+          <span className="eyebrow">CHANGE THE CONVERSATION</span>
         </div>
-      </section>
-
-      <section className="grid md:grid-cols-2">
-        <img src="/media/studio.jpg" alt="Cape Town jewellery bench" className="h-full min-h-[360px] w-full object-cover" />
-        <div className="flex flex-col justify-center bg-cream px-6 py-16 md:px-12">
-          <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">The house</p>
-          <h2 className="mt-3 font-serif text-title">ORA Jewellery</h2>
-          <p className="mt-4 max-w-md text-muted">
-            Intuitively crafted jewels a woman can make her own signature with — and live in. Follow the numbers
-            and the mistakes in real time on Instagram.
+        <h2>
+          “Why buy gold or diamonds from China or America when you can purchase directly from their
+          natural source—<i>Africa?</i>”
+        </h2>
+        <div className="manifesto-bottom">
+          <p>
+            A provocation. An invitation to look closer.
+            <br />
+            Our question expresses a perspective, not a sourcing guarantee for every piece.
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/shop">Enter the lookbook</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <a href={INSTAGRAM_FOUNDER} target="_blank" rel="noreferrer">
-                @natasha.thefounder
-              </a>
-            </Button>
-          </div>
+          <a className="text-link" href="/pages/transparency">
+            Provenance should be visible <ArrowUpRight size={16} />
+          </a>
         </div>
+      </section>
+      <section className="section product-edit">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">02 — The ORA edit</p>
+            <h2>Personal, by nature.</h2>
+          </div>
+          <a className="text-link" href="/shop">
+            Shop the collection <ArrowUpRight size={16} />
+          </a>
+        </div>
+        {products.length ? (
+          <ProductGrid products={products.slice(0, 4)} />
+        ) : (
+          <CommerceEmpty unavailable={unavailable} />
+        )}
+      </section>
+      {collections.length > 0 && (
+        <section className="collection-index section">
+          <p className="eyebrow">Find your own language</p>
+          {collections.map((c, i) => (
+            <a href={`/collections/${c.handle}`} key={c.id}>
+              <span className="small">0{i + 1}</span>
+              <h2>{c.title === "Home page" ? "The opening edit" : c.title}</h2>
+              <ArrowUpRight />
+            </a>
+          ))}
+        </section>
+      )}
+      <section className="perspective-split">
+        <div className="atmosphere">
+          <img
+            src="/media/atmosphere.webp"
+            srcSet="/media/atmosphere-768.webp 768w, /media/atmosphere.webp 1536w"
+            sizes="(max-width:700px) 100vw, 50vw"
+            width="1536"
+            height="1024"
+            loading="lazy"
+            alt="Atmospheric still life of dark stone and oxblood fabric"
+          />
+          <span className="eyebrow">FORM. FEELING. PERSPECTIVE.</span>
+        </div>
+        <div className="section">
+          <p className="eyebrow">03 — The philosophy</p>
+          <h2>
+            Closer to source.
+            <br />
+            <i>Closer to yourself.</i>
+          </h2>
+          <p>
+            Origin is more than a line on a label. It is a conversation about what we value, whose
+            work we recognise, and the questions we are prepared to ask.
+          </p>
+          <p>
+            Rooted in African perspective. Open to the world. Committed to making the distinction
+            between a story and a verified fact clear.
+          </p>
+          <a href="/pages/origin" className="text-link">
+            Explore our perspective <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </section>
+      <section className="founder-note section">
+        <p className="eyebrow">04 — From Natasha</p>
+        <h2>
+          “I am interested in what happens when you stop waiting to become someone—and start being{" "}
+          <i>yourself.</i>”
+        </h2>
+        <div>
+          <span className="signature">Natasha</span>
+          <a className="text-link" href="/pages/natasha">
+            Meet the mind behind the house <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </section>
+      {products.length > 4 && (
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Wear your own signature</p>
+              <h2>The pieces you make yours.</h2>
+            </div>
+          </div>
+          <ProductGrid products={products.slice(4, 8)} />
+        </section>
+      )}
+      <section className="invitation-grid">
+        <a className="invitation custom-invitation" href="/custom">
+          <p className="eyebrow">A piece that begins with you</p>
+          <h2>
+            Some stories
+            <br />
+            need their
+            <br />
+            <i>own shape.</i>
+          </h2>
+          <span className="text-link">
+            Begin a custom conversation <ArrowUpRight size={18} />
+          </span>
+        </a>
+        <a className="invitation salon-invitation" href="/members">
+          <p className="eyebrow">The private salon</p>
+          <h2>
+            Not a crowd.
+            <br />
+            <i>A connection.</i>
+          </h2>
+          <p>
+            A quieter space for private edits, early access and premier invitations as they become
+            available.
+          </p>
+          <span className="text-link">
+            Come closer <ArrowUpRight size={18} />
+          </span>
+        </a>
+      </section>
+      <section className="section house-paths">
+        <a href="/events">
+          <span className="eyebrow">Premier events</span>
+          <h3>The next gathering.</h3>
+          <p>Dates will appear here when confirmed.</p>
+          <ArrowUpRight />
+        </a>
+        <a href="/coaching">
+          <span className="eyebrow">Founder conversations</span>
+          <h3>Make your next move.</h3>
+          <p>A thoughtful conversation about what you are building.</p>
+          <ArrowUpRight />
+        </a>
+        <a href="/journal">
+          <span className="eyebrow">The journal</span>
+          <h3>Things worth asking.</h3>
+          <p>Notes on jewellery, identity and perspective.</p>
+          <ArrowUpRight />
+        </a>
       </section>
     </main>
   );
