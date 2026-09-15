@@ -21,6 +21,7 @@ export function safeCheckout(url: string) {
   const hosts = [
     "i6z1cd-5f.myshopify.com",
     "natashathefounder.myshopify.com",
+    "ora.natashathefounder.com",
     "www.natashathefounder.com",
     "natashathefounder.com",
     "checkout.shopify.com",
