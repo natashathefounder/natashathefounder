@@ -10,13 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as CoachingRouteImport } from './routes/coaching'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CustomRouteImport } from './routes/custom'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MembersRouteImport } from './routes/members'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as StackRouteImport } from './routes/stack'
 import { Route as StudioRouteImport } from './routes/studio'
+import { Route as ApiBagRouteImport } from './routes/api/bag'
+import { Route as CollectionsHandleRouteImport } from './routes/collections/$handle'
+import { Route as EventsIndexRouteImport } from './routes/events/index'
+import { Route as EventsSlugRouteImport } from './routes/events/$slug'
+import { Route as JournalIndexRouteImport } from './routes/journal/index'
+import { Route as JournalSlugRouteImport } from './routes/journal/$slug'
+import { Route as PagesSlugRouteImport } from './routes/pages/$slug'
+import { Route as ProductsHandleRouteImport } from './routes/products/$handle'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -24,9 +37,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoachingRoute = CoachingRouteImport.update({
   id: '/coaching',
   path: '/coaching',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomRoute = CustomRouteImport.update({
@@ -44,9 +67,24 @@ const MembersRoute = MembersRouteImport.update({
   path: '/members',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ShopRoute = ShopRouteImport.update({
   id: '/shop',
   path: '/shop',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StackRoute = StackRouteImport.update({
@@ -59,6 +97,46 @@ const StudioRoute = StudioRouteImport.update({
   path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBagRoute = ApiBagRouteImport.update({
+  id: '/api/bag',
+  path: '/api/bag',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CollectionsHandleRoute = CollectionsHandleRouteImport.update({
+  id: '/collections/$handle',
+  path: '/collections/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsSlugRoute = EventsSlugRouteImport.update({
+  id: '/events/$slug',
+  path: '/events/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalIndexRoute = JournalIndexRouteImport.update({
+  id: '/journal/',
+  path: '/journal/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalSlugRoute = JournalSlugRouteImport.update({
+  id: '/journal/$slug',
+  path: '/journal/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesSlugRoute = PagesSlugRouteImport.update({
+  id: '/pages/$slug',
+  path: '/pages/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsHandleRoute = ProductsHandleRouteImport.update({
+  id: '/products/$handle',
+  path: '/products/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -67,83 +145,174 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
   '/coaching': typeof CoachingRoute
+  '/contact': typeof ContactRoute
   '/custom': typeof CustomRoute
   '/login': typeof LoginRoute
   '/members': typeof MembersRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/bag': typeof ApiBagRoute
+  '/collections/$handle': typeof CollectionsHandleRoute
+  '/events/$slug': typeof EventsSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/products/$handle': typeof ProductsHandleRoute
+  '/events/': typeof EventsIndexRoute
+  '/journal/': typeof JournalIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
   '/coaching': typeof CoachingRoute
+  '/contact': typeof ContactRoute
   '/custom': typeof CustomRoute
   '/login': typeof LoginRoute
   '/members': typeof MembersRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/bag': typeof ApiBagRoute
+  '/collections/$handle': typeof CollectionsHandleRoute
+  '/events/$slug': typeof EventsSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/products/$handle': typeof ProductsHandleRoute
+  '/events': typeof EventsIndexRoute
+  '/journal': typeof JournalIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cart': typeof CartRoute
   '/coaching': typeof CoachingRoute
+  '/contact': typeof ContactRoute
   '/custom': typeof CustomRoute
   '/login': typeof LoginRoute
   '/members': typeof MembersRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/search': typeof SearchRoute
   '/shop': typeof ShopRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stack': typeof StackRoute
   '/studio': typeof StudioRoute
+  '/api/bag': typeof ApiBagRoute
+  '/collections/$handle': typeof CollectionsHandleRoute
+  '/events/$slug': typeof EventsSlugRoute
+  '/journal/$slug': typeof JournalSlugRoute
+  '/pages/$slug': typeof PagesSlugRoute
+  '/products/$handle': typeof ProductsHandleRoute
+  '/events/': typeof EventsIndexRoute
+  '/journal/': typeof JournalIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cart'
     | '/coaching'
+    | '/contact'
     | '/custom'
     | '/login'
     | '/members'
+    | '/robots.txt'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/stack'
     | '/studio'
+    | '/api/bag'
+    | '/collections/$handle'
+    | '/events/$slug'
+    | '/journal/$slug'
+    | '/pages/$slug'
+    | '/products/$handle'
+    | '/events/'
+    | '/journal/'
     | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cart'
     | '/coaching'
+    | '/contact'
     | '/custom'
     | '/login'
     | '/members'
+    | '/robots.txt'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/stack'
     | '/studio'
+    | '/api/bag'
+    | '/collections/$handle'
+    | '/events/$slug'
+    | '/journal/$slug'
+    | '/pages/$slug'
+    | '/products/$handle'
+    | '/events'
+    | '/journal'
     | '/api/auth/$'
   id:
     | '__root__'
     | '/'
+    | '/cart'
     | '/coaching'
+    | '/contact'
     | '/custom'
     | '/login'
     | '/members'
+    | '/robots.txt'
+    | '/search'
     | '/shop'
+    | '/sitemap.xml'
     | '/stack'
     | '/studio'
+    | '/api/bag'
+    | '/collections/$handle'
+    | '/events/$slug'
+    | '/journal/$slug'
+    | '/pages/$slug'
+    | '/products/$handle'
+    | '/events/'
+    | '/journal/'
     | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CartRoute: typeof CartRoute
   CoachingRoute: typeof CoachingRoute
+  ContactRoute: typeof ContactRoute
   CustomRoute: typeof CustomRoute
   LoginRoute: typeof LoginRoute
   MembersRoute: typeof MembersRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SearchRoute: typeof SearchRoute
   ShopRoute: typeof ShopRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StackRoute: typeof StackRoute
   StudioRoute: typeof StudioRoute
+  ApiBagRoute: typeof ApiBagRoute
+  CollectionsHandleRoute: typeof CollectionsHandleRoute
+  EventsSlugRoute: typeof EventsSlugRoute
+  JournalSlugRoute: typeof JournalSlugRoute
+  PagesSlugRoute: typeof PagesSlugRoute
+  ProductsHandleRoute: typeof ProductsHandleRoute
+  EventsIndexRoute: typeof EventsIndexRoute
+  JournalIndexRoute: typeof JournalIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -156,11 +325,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/coaching': {
       id: '/coaching'
       path: '/coaching'
       fullPath: '/coaching'
       preLoaderRoute: typeof CoachingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/custom': {
@@ -184,11 +367,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MembersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/shop': {
       id: '/shop'
       path: '/shop'
       fullPath: '/shop'
       preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/stack': {
@@ -205,6 +409,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/bag': {
+      id: '/api/bag'
+      path: '/api/bag'
+      fullPath: '/api/bag'
+      preLoaderRoute: typeof ApiBagRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/collections/$handle': {
+      id: '/collections/$handle'
+      path: '/collections/$handle'
+      fullPath: '/collections/$handle'
+      preLoaderRoute: typeof CollectionsHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$slug': {
+      id: '/events/$slug'
+      path: '/events/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof EventsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/': {
+      id: '/journal/'
+      path: '/journal'
+      fullPath: '/journal/'
+      preLoaderRoute: typeof JournalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/$slug': {
+      id: '/journal/$slug'
+      path: '/journal/$slug'
+      fullPath: '/journal/$slug'
+      preLoaderRoute: typeof JournalSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pages/$slug': {
+      id: '/pages/$slug'
+      path: '/pages/$slug'
+      fullPath: '/pages/$slug'
+      preLoaderRoute: typeof PagesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/$handle': {
+      id: '/products/$handle'
+      path: '/products/$handle'
+      fullPath: '/products/$handle'
+      preLoaderRoute: typeof ProductsHandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -217,13 +477,26 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CartRoute: CartRoute,
   CoachingRoute: CoachingRoute,
+  ContactRoute: ContactRoute,
   CustomRoute: CustomRoute,
   LoginRoute: LoginRoute,
   MembersRoute: MembersRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SearchRoute: SearchRoute,
   ShopRoute: ShopRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   StackRoute: StackRoute,
   StudioRoute: StudioRoute,
+  ApiBagRoute: ApiBagRoute,
+  CollectionsHandleRoute: CollectionsHandleRoute,
+  EventsSlugRoute: EventsSlugRoute,
+  JournalSlugRoute: JournalSlugRoute,
+  PagesSlugRoute: PagesSlugRoute,
+  ProductsHandleRoute: ProductsHandleRoute,
+  EventsIndexRoute: EventsIndexRoute,
+  JournalIndexRoute: JournalIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

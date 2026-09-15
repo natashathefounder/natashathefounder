@@ -1,154 +1,147 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { StackCanvas } from "@/components/stack-canvas";
-import { Button } from "@/components/ui/button";
-import { charms, SHOP } from "@/lib/catalog";
-import { useStackStore, type Base, type Metal } from "@/lib/stack-store";
-import { cn } from "@/lib/utils";
-import { useHydrated } from "@/lib/use-hydrated";
-
-export const Route = createFileRoute("/stack")({ component: StackPage });
-
-function StackPage() {
-  const store = useStackStore();
-  const hydrated = useHydrated();
-  const [name, setName] = useState("");
-  const selected = charms.filter((c) => store.charmIds.includes(c.id));
-
+import { ArrowUpRight, ArrowDown } from "lucide-react";
+import { ShoppingGuide, charmSystems } from "@/components/shopping-guide";
+import { ProductGrid, CommerceEmpty, Loading } from "@/components/commerce";
+import { getCatalogue } from "@/lib/commerce/catalogue";
+import { pageHead } from "@/lib/seo";
+export const Route = createFileRoute("/stack")({
+  loader: () => getCatalogue({ data: { q: "charm", sort: "featured" } }),
+  pendingComponent: Loading,
+  head: () =>
+    pageHead(
+      "The charm guide — ORA Jewellery",
+      "Find your starting point. Understand ORA’s three charm systems and explore the current charm collection.",
+      "/stack",
+    ),
+  component: CharmGuide,
+});
+function CharmGuide() {
+  const data = Route.useLoaderData();
   return (
-    <main className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-2 md:px-8 md:py-16">
-      <div>
-        <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">Charm stack</p>
-        <h1 className="mt-3 font-serif text-title">Compose it here. Buy it there.</h1>
-        <p className="mt-4 text-muted">
-          Pick a base, a metal, up to eight charms. Saved stacks stay on this device. Checkout is always on
-          orajewellery.com.
-        </p>
-
-        <div className="mt-8 overflow-hidden border border-line">
-          <StackCanvas base={store.base} metal={store.metal} charmIds={store.charmIds} />
-        </div>
-        <p className="mt-3 font-sans text-xs uppercase tracking-[0.14em] text-muted tabular-nums">
-          {store.charmIds.length} / 8 charms · {store.metal} · {store.base}
-        </p>
-      </div>
-
-      <div>
-        <Field label="Base">
-          {(["hoop", "bangle"] as Base[]).map((b) => (
-            <Chip key={b} active={store.base === b} onClick={() => store.setBase(b)}>
-              {b}
-            </Chip>
-          ))}
-        </Field>
-        <Field label="Metal">
-          {(["gold", "silver"] as Metal[]).map((m) => (
-            <Chip key={m} active={store.metal === m} onClick={() => store.setMetal(m)}>
-              {m === "gold" ? "Gold plated" : "Silver"}
-            </Chip>
-          ))}
-        </Field>
-
-        <p className="mt-8 font-sans text-[0.7rem] uppercase tracking-[0.16em] text-metal">Charms</p>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {charms.map((c) => {
-            const on = store.charmIds.includes(c.id);
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => store.toggleCharm(c.id)}
-                className={cn(
-                  "flex h-14 items-center gap-2 border px-3 text-left text-sm",
-                  on ? "border-ink bg-ink text-paper" : "border-line hover:border-ink",
-                )}
-              >
-                <span className="font-serif text-lg">{c.glyph}</span>
-                <span className="leading-tight">{c.name}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-2">
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Name this stack"
-            className="h-11 min-w-[12rem] flex-1 border border-line bg-card px-3 font-serif text-lg outline-none focus:border-ink"
-          />
-          <Button type="button" onClick={() => store.saveStack(name)}>
-            Save stack
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => store.clearCharms()}>
-            Clear
-          </Button>
-        </div>
-
-        {selected.length > 0 ? (
-          <a
-            href={SHOP + "/pages/build-your-charm-stack"}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex h-11 items-center font-sans text-[0.72rem] uppercase tracking-[0.16em] text-metal hover:text-ink"
-          >
-            Buy this stack on ORA
-          </a>
-        ) : null}
-
-        {hydrated && store.saved.length > 0 ? (
-          <div className="mt-10 border-t border-line pt-8">
-            <p className="font-sans text-[0.7rem] uppercase tracking-[0.16em] text-metal">Saved on this device</p>
-            <ul className="mt-4 space-y-2">
-              {store.saved.map((s) => (
-                <li key={s.id} className="flex items-center justify-between gap-3 border border-line px-3 py-3">
-                  <button type="button" className="text-left" onClick={() => store.loadStack(s.id)}>
-                    <span className="block font-serif text-xl">{s.name}</span>
-                    <span className="text-xs text-muted">
-                      {s.metal} {s.base} · {s.charmIds.length} charms
-                    </span>
-                  </button>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => store.removeStack(s.id)}>
-                    Remove
-                  </Button>
-                </li>
-              ))}
-            </ul>
+    <main>
+      <section className="charm-hero">
+        <div>
+          <p className="eyebrow">ORA / THE CHARM GUIDE</p>
+          <h1>
+            A story.
+            <br />
+            <i>
+              One piece
+              <br />
+              at a time.
+            </i>
+          </h1>
+          <p>
+            Keep the possibilities. Lose the guesswork. Start with the connection, then follow your
+            own eye.
+          </p>
+          <div className="actions">
+            <ShoppingGuide className="button light" />
+            <a className="text-link" href="#systems">
+              Meet the three systems <ArrowDown size={16} />
+            </a>
           </div>
-        ) : null}
-      </div>
+        </div>
+        <div className="charm-hero-note">
+          <span className="guide-number">03</span>
+          <p className="eyebrow">SYSTEMS. DIFFERENT CONNECTIONS.</p>
+          <h2>
+            The first question
+            <br />
+            isn’t “which charm?”
+            <br />
+            <i>It’s “what will I wear it on?”</i>
+          </h2>
+          <p>
+            Your chain or hoop is the starting point. A charm’s attachment decides what comes next.
+          </p>
+        </div>
+      </section>
+      <section className="section" id="systems">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">START WITH THE CONNECTION</p>
+            <h2>Three ways to make it yours.</h2>
+          </div>
+        </div>
+        <div className="charm-system-grid">
+          {charmSystems.map((s, i) => (
+            <article key={s.name}>
+              <div className="system-heading">
+                <span className="eyebrow">0{i + 1}</span>
+                <s.icon size={30} strokeWidth={1} aria-hidden="true" />
+              </div>
+              <h3>{s.name}</h3>
+              <p className="system-lede">{s.description}</p>
+              <p>{s.detail}</p>
+            </article>
+          ))}
+        </div>
+        <p className="guide-note">
+          These are general system descriptions. Product-level compatibility still needs to be
+          checked for the exact charm and base. The three systems are not universally
+          interchangeable.
+        </p>
+      </section>
+      <section className="charm-check section">
+        <div>
+          <p className="eyebrow">BEFORE YOU ADD TO BAG</p>
+          <h2>
+            A small check.
+            <br />
+            <i>A better choice.</i>
+          </h2>
+        </div>
+        <ol>
+          <li>
+            <span>01</span>
+            <div>
+              <h3>Name your starting piece.</h3>
+              <p>Find the chain or hoops you already have, or the base you want to buy.</p>
+            </div>
+          </li>
+          <li>
+            <span>02</span>
+            <div>
+              <h3>Look at the connection.</h3>
+              <p>Read the attachment details and measurements for both pieces.</p>
+            </div>
+          </li>
+          <li>
+            <span>03</span>
+            <div>
+              <h3>Ask if there’s any doubt.</h3>
+              <p>
+                Send the product names or links together. We can discuss the combination before you
+                order.
+              </p>
+              <a className="text-link" href="/contact?topic=Product+guidance">
+                Ask about a combination <ArrowUpRight size={16} />
+              </a>
+            </div>
+          </li>
+        </ol>
+      </section>
+      <section className="section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">FOLLOW YOUR OWN EYE</p>
+            <h2>A few possibilities.</h2>
+          </div>
+          <a className="text-link" href="/shop?q=charm">
+            Explore all charms <ArrowUpRight size={16} />
+          </a>
+        </div>
+        <p className="small muted">
+          From the current charm catalogue. This edit is inspiration, not a set of confirmed
+          compatible pieces.
+        </p>
+        {data.products.length ? (
+          <ProductGrid products={data.products.slice(0, 4)} />
+        ) : (
+          <CommerceEmpty unavailable={data.unavailable} />
+        )}
+      </section>
     </main>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mt-6">
-      <p className="font-sans text-[0.7rem] uppercase tracking-[0.16em] text-metal">{label}</p>
-      <div className="mt-2 flex flex-wrap gap-2">{children}</div>
-    </div>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "h-11 border px-4 font-sans text-[0.72rem] uppercase tracking-[0.12em]",
-        active ? "border-ink bg-ink text-paper" : "border-line text-muted hover:border-ink hover:text-ink",
-      )}
-    >
-      {children}
-    </button>
   );
 }

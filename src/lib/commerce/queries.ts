@@ -1,0 +1,15 @@
+export const MEDIA = `url altText width height`;
+export const VARIANT = `id title availableForSale price { amount currencyCode } selectedOptions { name value } image { ${MEDIA} }`;
+export const CARD = `id handle title description productType vendor availableForSale featuredImage { ${MEDIA} } priceRange { minVariantPrice { amount currencyCode } } seo { title description }`;
+export const CATALOGUE = `query Catalogue($after:String,$query:String,$sort:ProductSortKeys!,$reverse:Boolean!) @inContext(country:GB) { products(first:24,after:$after,query:$query,sortKey:$sort,reverse:$reverse) { nodes { ${CARD} } pageInfo { hasNextPage endCursor } } collections(first:100) { nodes { id handle title description image { ${MEDIA} } } } }`;
+export const COLLECTION = `query Collection($handle:String!,$after:String,$sort:ProductCollectionSortKeys!,$reverse:Boolean!,$filters:[ProductFilter!]) @inContext(country:GB) { collection(handle:$handle) { id handle title description image { ${MEDIA} } products(first:24,after:$after,sortKey:$sort,reverse:$reverse,filters:$filters) { nodes { ${CARD} } pageInfo {hasNextPage endCursor} } } }`;
+export const PRODUCT = `query Product($handle:String!) @inContext(country:GB) { product(handle:$handle) { ${CARD} images(first:50) { nodes { ${MEDIA} } } options {name values} variants(first:250) {nodes { ${VARIANT} } pageInfo {hasNextPage endCursor}} } }`;
+export const MORE_VARIANTS = `query Variants($handle:String!,$after:String!) @inContext(country:GB) { product(handle:$handle) { variants(first:250,after:$after) {nodes { ${VARIANT} } pageInfo {hasNextPage endCursor}} } }`;
+export const RECOMMENDATIONS = `query Recommendations($id:ID!) @inContext(country:GB) { productRecommendations(productId:$id) { ${CARD} } }`;
+export const PREDICTIVE = `query Predictive($query:String!) @inContext(country:GB) { predictiveSearch(query:$query,limit:6,types:[PRODUCT]) { products { ${CARD} } } }`;
+export const CART_FIELDS = `id checkoutUrl totalQuantity cost { subtotalAmount {amount currencyCode} totalAmount {amount currencyCode} } lines(first:250) { nodes {id quantity cost {totalAmount {amount currencyCode}} merchandise {... on ProductVariant {${VARIANT} product {title handle}}}} pageInfo {hasNextPage endCursor} }`;
+export const CART_QUERY = `query Bag($id:ID!) @inContext(country:GB) {cart(id:$id) {${CART_FIELDS}}}`;
+export const CART_CREATE = `mutation CreateBag($input:CartInput!) {cartCreate(input:$input){cart{${CART_FIELDS}} userErrors{field message}}}`;
+export const CART_ADD = `mutation AddLines($id:ID!,$lines:[CartLineInput!]!){cartLinesAdd(cartId:$id,lines:$lines){cart{${CART_FIELDS}} userErrors{field message}}}`;
+export const CART_UPDATE = `mutation UpdateLines($id:ID!,$lines:[CartLineUpdateInput!]!){cartLinesUpdate(cartId:$id,lines:$lines){cart{${CART_FIELDS}} userErrors{field message}}}`;
+export const CART_REMOVE = `mutation RemoveLines($id:ID!,$lineIds:[ID!]!){cartLinesRemove(cartId:$id,lineIds:$lineIds){cart{${CART_FIELDS}} userErrors{field message}}}`;

@@ -11,3 +11,7 @@ artifacts
 dist
 .output
 public/__grok
+
+.env
+.env.*
+!.env.example

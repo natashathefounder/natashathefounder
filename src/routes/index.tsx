@@ -1,109 +1,288 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { CoachingCheckoutButton } from "@/components/coaching-checkout";
-import { Button } from "@/components/ui/button";
-import { chapters, INSTAGRAM_FOUNDER, SHOP } from "@/lib/catalog";
-
-export const Route = createFileRoute("/")({ component: Home });
-
+import { createFileRoute } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
+import { getCatalogue } from "@/lib/commerce/catalogue";
+import { ProductGrid, CommerceEmpty, Loading } from "@/components/commerce";
+import { pageHead } from "@/lib/seo";
+import { ShoppingGuide, charmSystems } from "@/components/shopping-guide";
+import { imageUrl } from "@/lib/commerce/types";
+const categories = [
+  { title: "Charms", type: "Clip Charm", href: "/shop?q=charm" },
+  { title: "Bracelets", type: "Bracelets", href: "/shop?type=Bracelets" },
+  { title: "Necklaces", type: "Necklaces", href: "/shop?type=Necklaces" },
+  { title: "Earrings", type: "Earrings", href: "/shop?type=Earrings" },
+];
+export const Route = createFileRoute("/")({
+  loader: async () => {
+    const [catalogue, ...edits] = await Promise.all([
+      getCatalogue({ data: { sort: "featured" } }),
+      ...categories.map(({ type }) => getCatalogue({ data: { type, sort: "featured" } })),
+    ]);
+    return {
+      ...catalogue,
+      products: catalogue.products.filter((product) =>
+        /ring|bracelet|necklace|earring|charm|bangle|chain|pendant|hoop/i.test(product.productType),
+      ),
+      categoryImages: edits.map(
+        (edit) => edit.products.find((p) => p.featuredImage)?.featuredImage,
+      ),
+    };
+  },
+  pendingComponent: Loading,
+  head: () =>
+    pageHead(
+      "Natasha The Founder — ORA Jewellery",
+      "An independent house of jewellery, perspective and possibility. Explore ORA Jewellery and the world of Natasha Collins.",
+      "/",
+    ),
+  component: Home,
+});
 function Home() {
+  const { products, unavailable, categoryImages } = Route.useLoaderData();
   return (
     <main>
-      <section className="grid md:grid-cols-2">
-        <div className="flex flex-col justify-center px-6 py-16 md:px-12 md:py-24">
-          <p className="mb-4 font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">
-            Cape Town · Founder & designer
-          </p>
-          <h1 className="font-serif text-display">
-            Natasha
+      <section className="shop-hero">
+        <figure>
+          {" "}
+          <img
+            src="https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=1440"
+            srcSet="https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=640 640w, https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=1440 1440w, https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=2048 2048w"
+            sizes="100vw"
+            width="2048"
+            height="1140"
+            fetchPriority="high"
+            alt="Model wearing a charm necklace, hoop earrings and two bracelets with a white shirt"
+          />
+        </figure>
+        <div className="shop-hero-copy">
+          <p className="eyebrow">ORA JEWELLERY · THE HOUSE OF NATASHA</p>
+          <h1>
+            Your story.
             <br />
-            Collins
+            <i>Wear it your way.</i>
           </h1>
-          <p className="mt-6 max-w-md text-muted">
-            I made my first piece of jewellery at fifteen. ORA was born from instinct. From saying no to no.
-            From turning gold and silver into something you feel.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/stack">Build a charm stack</Link>
-            </Button>
-            <CoachingCheckoutButton />
-            <Button variant="ghost" asChild>
-              <a href={SHOP} target="_blank" rel="noreferrer">
-                Open the shop
-              </a>
-            </Button>
+          <div className="shop-hero-actions">
+            <a className="button" href="/shop">
+              Shop jewellery <ArrowUpRight size={18} />
+            </a>
+            <a className="text-link" href="/shop?q=charm">
+              Explore charms <ArrowUpRight size={18} />
+            </a>
           </div>
         </div>
-        <figure className="relative min-h-[420px]">
-          <img
-            src="/media/hoop-charms.jpg"
-            alt="Gold hoop with clip charms on ivory linen"
-            className="h-full w-full object-cover"
-          />
-          <figcaption className="absolute bottom-4 left-4 font-sans text-[0.7rem] uppercase tracking-[0.16em] text-paper">
-            Worn your way. No permission needed.
-          </figcaption>
-        </figure>
       </section>
-
-      <section className="bg-cream px-6 py-20 md:px-16">
-        <blockquote className="mx-auto max-w-3xl font-serif text-title italic leading-snug">
-          I do not design for someday. I design for every version of you. Bold. Bruised. Becoming. Here. Now.
-          Always.
-          <cite className="mt-6 block font-sans text-[0.72rem] not-italic uppercase tracking-[0.2em] text-metal">
-            Natasha x
-          </cite>
-        </blockquote>
-      </section>
-
-      <section className="grid grid-cols-2 border-y border-line md:grid-cols-4">
-        {[
-          ["15", "Age she made her first piece"],
-          ["10k+", "ORA pieces sold and counting"],
-          ["24", "Month craftsmanship warranty"],
-          ["CT", "Handmade in Cape Town"],
-        ].map(([k, v]) => (
-          <div key={k} className="border-b border-line px-4 py-8 text-center md:border-b-0 md:border-r md:last:border-r-0">
-            <p className="font-serif text-4xl tabular-nums">{k}</p>
-            <p className="mt-2 text-xs text-muted">{v}</p>
+      <section className="shopping-categories section" aria-label="Shop by category">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Find your starting point</p>
+            <h2>What speaks to you?</h2>
           </div>
-        ))}
+        </div>
+        <div className="category-photo-grid">
+          {categories.map((category, index) => {
+            const photo = categoryImages[index];
+            return (
+              <a href={category.href} key={category.title}>
+                <div className="category-photo">
+                  {photo && (
+                    <img
+                      src={imageUrl(photo.url, 640)}
+                      srcSet={
+                        imageUrl(photo.url, 320) + " 320w, " + imageUrl(photo.url, 640) + " 640w"
+                      }
+                      sizes="(max-width:700px) 44vw, 23vw"
+                      width={640}
+                      height={640}
+                      loading="lazy"
+                      alt={photo.altText || category.title + " from ORA Jewellery"}
+                    />
+                  )}
+                </div>
+                <span>
+                  {category.title}
+                  <ArrowUpRight size={20} />
+                </span>
+              </a>
+            );
+          })}
+        </div>
       </section>
-
-      <section className="px-6 py-20 md:px-12">
-        <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">The story</p>
-        <h2 className="mt-3 max-w-xl font-serif text-title">From a first piece at fifteen to a Cape Town house.</h2>
-        <div className="mt-12 grid gap-10 md:grid-cols-2">
-          {chapters.map((c) => (
-            <article key={c.num}>
-              <p className="font-sans text-[0.7rem] uppercase tracking-[0.2em] text-metal">{c.num}</p>
-              <h3 className="mt-2 font-serif text-3xl">{c.title}</h3>
-              <p className="mt-3 max-w-md text-muted">{c.body}</p>
+      <section className="home-connections section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">A little direction</p>
+            <h2>Start with the connection.</h2>
+          </div>
+          <ShoppingGuide />
+        </div>
+        <div className="connection-grid">
+          {charmSystems.map(({ name, icon: Icon, description }) => (
+            <article key={name}>
+              <Icon size={32} strokeWidth={1} />
+              <h3>{name}</h3>
+              <p>{description}</p>
             </article>
           ))}
         </div>
+        <p className="connection-note">
+          Three different systems. Check the exact charm and base before combining them.{" "}
+          <a href="/stack">Explore the guide ↗</a>
+        </p>
       </section>
-
-      <section className="grid md:grid-cols-2">
-        <img src="/media/studio.jpg" alt="Cape Town jewellery bench" className="h-full min-h-[360px] w-full object-cover" />
-        <div className="flex flex-col justify-center bg-cream px-6 py-16 md:px-12">
-          <p className="font-sans text-[0.72rem] uppercase tracking-[0.22em] text-metal">The house</p>
-          <h2 className="mt-3 font-serif text-title">ORA Jewellery</h2>
-          <p className="mt-4 max-w-md text-muted">
-            Intuitively crafted jewels a woman can make her own signature with — and live in. Follow the numbers
-            and the mistakes in real time on Instagram.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild>
-              <Link to="/shop">Enter the lookbook</Link>
-            </Button>
-            <Button variant="ghost" asChild>
-              <a href={INSTAGRAM_FOUNDER} target="_blank" rel="noreferrer">
-                @natasha.thefounder
-              </a>
-            </Button>
+      <section className="section product-edit">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">02 — The ORA edit</p>
+            <h2>Personal, by nature.</h2>
           </div>
+          <a className="text-link" href="/shop">
+            Shop the collection <ArrowUpRight size={16} />
+          </a>
         </div>
+        {products.length ? (
+          <ProductGrid products={products.slice(0, 4)} />
+        ) : (
+          <CommerceEmpty unavailable={unavailable} />
+        )}
+      </section>
+      <section className="home-reassurance section" aria-label="Choose with confidence">
+        <a href="/pages/craftsmanship">
+          <h3>Know your materials.</h3>
+          <p>Look closer at the metal, finish and care for your piece.</p>
+        </a>
+        <a href="/contact">
+          <h3>Ask a real question.</h3>
+          <p>Fit, materials or a special occasion? Begin a conversation.</p>
+        </a>
+        <a href="/pages/delivery">
+          <h3>Before it is yours.</h3>
+          <p>Review delivery and returns. Delivery options appear at checkout.</p>
+        </a>
+      </section>
+      <section id="perspective" className="manifesto section">
+        <div className="section-label">
+          <span className="eyebrow">01 — A question of origin</span>
+          <span className="eyebrow">CHANGE THE CONVERSATION</span>
+        </div>
+        <h2>
+          “Why buy gold or diamonds from China or America when you can purchase directly from their
+          natural source—<i>Africa?</i>”
+        </h2>
+        <div className="manifesto-bottom">
+          <p>
+            A provocation. An invitation to look closer.
+            <br />
+            Our question expresses a perspective, not a sourcing guarantee for every piece.
+          </p>
+          <a className="text-link" href="/pages/transparency">
+            Provenance should be visible <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </section>
+      <section className="perspective-split">
+        <div className="atmosphere">
+          <img
+            src="/media/atmosphere.webp"
+            srcSet="/media/atmosphere-768.webp 768w, /media/atmosphere.webp 1536w"
+            sizes="(max-width:700px) 100vw, 50vw"
+            width="1536"
+            height="1024"
+            loading="lazy"
+            alt="Atmospheric still life of dark stone and oxblood fabric"
+          />
+          <span className="eyebrow">FORM. FEELING. PERSPECTIVE.</span>
+        </div>
+        <div className="section">
+          <p className="eyebrow">03 — The philosophy</p>
+          <h2>
+            Closer to source.
+            <br />
+            <i>Closer to yourself.</i>
+          </h2>
+          <p>
+            Origin is more than a line on a label. It is a conversation about what we value, whose
+            work we recognise, and the questions we are prepared to ask.
+          </p>
+          <p>
+            Rooted in African perspective. Open to the world. Committed to making the distinction
+            between a story and a verified fact clear.
+          </p>
+          <a href="/pages/origin" className="text-link">
+            Explore our perspective <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </section>
+      <section className="founder-note section">
+        <p className="eyebrow">04 — From Natasha</p>
+        <h2>
+          Jewellery, perspective and the freedom to become more fully <i>yourself.</i>
+        </h2>
+        <div>
+          <span className="signature">Natasha</span>
+          <a className="text-link" href="/pages/natasha">
+            Meet the mind behind the house <ArrowUpRight size={16} />
+          </a>
+        </div>
+      </section>
+      {products.length > 4 && (
+        <section className="section">
+          <div className="section-heading">
+            <div>
+              <p className="eyebrow">Wear your own signature</p>
+              <h2>The pieces you make yours.</h2>
+            </div>
+          </div>
+          <ProductGrid products={products.slice(4, 8)} />
+        </section>
+      )}
+      <section className="invitation-grid">
+        <a className="invitation custom-invitation" href="/custom">
+          <p className="eyebrow">A piece that begins with you</p>
+          <h2>
+            Some stories
+            <br />
+            need their
+            <br />
+            <i>own shape.</i>
+          </h2>
+          <span className="text-link">
+            Begin a custom conversation <ArrowUpRight size={18} />
+          </span>
+        </a>
+        <a className="invitation salon-invitation" href="/members">
+          <p className="eyebrow">The private salon</p>
+          <h2>
+            Not a crowd.
+            <br />
+            <i>A connection.</i>
+          </h2>
+          <p>
+            A quieter space for private edits, early access and premier invitations as they become
+            available.
+          </p>
+          <span className="text-link">
+            Come closer <ArrowUpRight size={18} />
+          </span>
+        </a>
+      </section>
+      <section className="section house-paths">
+        <a href="/events">
+          <span className="eyebrow">Premier events</span>
+          <h3>The next gathering.</h3>
+          <p>Dates will appear here when confirmed.</p>
+          <ArrowUpRight />
+        </a>
+        <a href="/coaching">
+          <span className="eyebrow">Founder conversations</span>
+          <h3>Make your next move.</h3>
+          <p>A thoughtful conversation about what you are building.</p>
+          <ArrowUpRight />
+        </a>
+        <a href="/journal">
+          <span className="eyebrow">The journal</span>
+          <h3>Things worth asking.</h3>
+          <p>Notes on jewellery, identity and perspective.</p>
+          <ArrowUpRight />
+        </a>
       </section>
     </main>
   );
