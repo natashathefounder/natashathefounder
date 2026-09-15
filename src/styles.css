@@ -1681,3 +1681,154 @@ img {
     height: auto;
   }
 }
+
+/* Shop-first campaign: preserve the complete original photograph. */
+.shop-hero {
+  position: relative;
+  background: #e8dfd0;
+  color: #211b18;
+}
+.shop-hero figure {
+  margin: 0;
+}
+.shop-hero figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shop-hero-copy {
+  position: absolute;
+  top: 9%;
+  right: 4%;
+  width: 34%;
+}
+.shop-hero-copy h1 {
+  font-size: clamp(40px, 5vw, 84px);
+  line-height: 1.02;
+  margin: 24px 0 30px;
+}
+.shop-hero-copy .eyebrow {
+  font-size: 10px;
+}
+.shop-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.shop-hero-actions .button {
+  background: #351a24;
+  color: #fff;
+}
+.category-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+.category-photo {
+  aspect-ratio: 1;
+  background: #eee9e2;
+  overflow: hidden;
+}
+.category-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.category-photo-grid a > span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-serif, serif);
+  font-size: 28px;
+  padding: 15px 0;
+}
+.home-connections {
+  background: #351a24;
+  color: #faf4ed;
+}
+.home-connections .guide-trigger {
+  color: inherit;
+  border-color: #ab8e96;
+}
+.connection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+.connection-grid article {
+  border-top: 1px solid #88646c;
+  padding-top: 24px;
+}
+.connection-grid h3,
+.home-reassurance h3 {
+  font-size: 30px;
+  margin: 12px 0;
+}
+.connection-grid p {
+  max-width: 32ch;
+}
+.connection-note {
+  margin: 28px 0 0;
+  font-size: 14px;
+  max-width: 80ch;
+}
+.connection-note a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.home-reassurance {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  border-top: 1px solid #d7cfc5;
+}
+.home-reassurance p {
+  max-width: 34ch;
+}
+@media (max-width: 700px) {
+  .shop-hero-copy {
+    position: static;
+    width: auto;
+    padding: 26px 6% 32px;
+  }
+  .shop-hero-copy h1 {
+    font-size: 48px;
+    margin: 16px 0 24px;
+  }
+  .shop-hero-actions {
+    gap: 18px;
+  }
+  .category-photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .category-photo-grid a > span {
+    font-size: 24px;
+  }
+  .connection-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .connection-grid article {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    column-gap: 14px;
+  }
+  .connection-grid h3 {
+    margin: 0;
+  }
+  .connection-grid p {
+    grid-column: 2;
+    margin: 8px 0;
+  }
+  .home-reassurance {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .home-connections .section-heading {
+    align-items: flex-start;
+    gap: 20px;
+  }
+}
