@@ -3,6 +3,7 @@ import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { getCatalogue } from "@/lib/commerce/catalogue";
 import { ProductGrid, CommerceEmpty, Loading } from "@/components/commerce";
 import { pageHead } from "@/lib/seo";
+import { DiscoveryEntry } from "@/components/shopping-guide";
 export const Route = createFileRoute("/")({
   loader: () => getCatalogue({ data: { sort: "featured" } }),
   pendingComponent: Loading,
@@ -54,6 +55,7 @@ function Home() {
         </figure>
         <span className="hero-edition">01 / THE ORIGIN EDIT</span>
       </section>
+      <DiscoveryEntry />
       <section id="perspective" className="manifesto section">
         <div className="section-label">
           <span className="eyebrow">01 — A question of origin</span>
@@ -138,8 +140,7 @@ function Home() {
       <section className="founder-note section">
         <p className="eyebrow">04 — From Natasha</p>
         <h2>
-          “I am interested in what happens when you stop waiting to become someone—and start being{" "}
-          <i>yourself.</i>”
+          Jewellery, perspective and the freedom to become more fully <i>yourself.</i>
         </h2>
         <div>
           <span className="signature">Natasha</span>

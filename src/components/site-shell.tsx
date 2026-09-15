@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from "react";
-import { Menu, X, ShoppingBag, ArrowUpRight, Search } from "lucide-react";
+import { Menu, X, ShoppingBag, ArrowUpRight, Search, Gem, UserRound } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { BagProvider, useBag, PredictiveSearch } from "./commerce";
+import { ShoppingGuide } from "./shopping-guide";
 const links = [
   ["The collection", "/shop"],
-  ["Our perspective", "/pages/origin"],
+  ["The charm guide", "/stack"],
   ["Natasha", "/pages/natasha"],
   ["The private salon", "/members"],
 ];
@@ -31,6 +32,7 @@ function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="header-actions">
+          <ShoppingGuide className="desktop-guide guide-trigger" />
           <button
             className="icon-button"
             aria-label="Search"
@@ -87,6 +89,21 @@ function Shell({ children }: { children: ReactNode }) {
       <div id="main-content" tabIndex={-1}>
         {children}
       </div>
+      <nav className="mobile-shopping-nav" aria-label="Quick shopping navigation">
+        <a href="/shop">
+          <Gem size={19} />
+          Shop
+        </a>
+        <ShoppingGuide label="Guide" className="mobile-guide" />
+        <a href="/members">
+          <UserRound size={19} />
+          Salon
+        </a>
+        <button onClick={() => setOpen(true)}>
+          <ShoppingBag size={19} />
+          Bag ({cart?.totalQuantity || 0})
+        </button>
+      </nav>
       <section className="newsletter section">
         <div>
           <p className="eyebrow">Letters from the house</p>
@@ -111,6 +128,7 @@ function Shell({ children }: { children: ReactNode }) {
           <div>
             <p className="eyebrow">The collection</p>
             <a href="/shop">All jewellery</a>
+            <a href="/stack">The charm guide</a>
             <a href="/custom">Something personal</a>
             <a href="/cart">Your bag</a>
           </div>

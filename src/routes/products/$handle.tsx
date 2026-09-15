@@ -4,6 +4,7 @@ import { getProduct } from "@/lib/commerce/catalogue";
 import { ProductGrid, CommerceEmpty, Loading, useBag } from "@/components/commerce";
 import { imageUrl, money, type Product } from "@/lib/commerce/types";
 import { pageHead, jsonLd, SITE } from "@/lib/seo";
+import { ShoppingGuide } from "@/components/shopping-guide";
 export const Route = createFileRoute("/products/$handle")({
   loader: ({ params }) => getProduct({ data: params.handle }),
   pendingComponent: Loading,
@@ -166,6 +167,11 @@ function ProductDetail({ p, related }: { p: Product; related: Product[] }) {
                 </div>
               </fieldset>
             ))}
+          <div className="pdp-guidance">
+            <span className="eyebrow">A confident choice starts with a question.</span>
+            <ShoppingGuide product={p.title} label="Fit, materials or care?" />
+            <p>Check the details for this exact piece. Ask us about anything you need confirmed.</p>
+          </div>
           <div className="purchase-panel">
             <p className="small" role="status">
               {!variant
@@ -256,8 +262,9 @@ function ProductDetail({ p, related }: { p: Product; related: Product[] }) {
       {related.length > 0 && (
         <section className="section">
           <div className="section-heading">
-            <h2>In good company.</h2>
+            <h2>More to discover.</h2>
           </div>
+          <p className="small muted">An edit to explore, not a compatibility recommendation.</p>
           <ProductGrid products={related.slice(0, 4)} />
         </section>
       )}

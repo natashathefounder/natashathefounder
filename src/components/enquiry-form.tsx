@@ -1,5 +1,13 @@
 import { useState } from "react";
-export function EnquiryForm({ custom = false }: { custom?: boolean }) {
+export function EnquiryForm({
+  custom = false,
+  topic = "General enquiry",
+  piece = "",
+}: {
+  custom?: boolean;
+  topic?: string;
+  piece?: string;
+}) {
   const [draft, setDraft] = useState("");
   return (
     <>
@@ -27,8 +35,9 @@ export function EnquiryForm({ custom = false }: { custom?: boolean }) {
         </label>
         <label>
           What would you like to discuss?
-          <select name="Topic" defaultValue={custom ? "Custom jewellery" : "General enquiry"}>
+          <select name="Topic" defaultValue={custom ? "Custom jewellery" : topic}>
             <option>General enquiry</option>
+            <option>Product guidance</option>
             <option>Custom jewellery</option>
             <option>Coaching</option>
             <option>Private salon</option>
@@ -74,7 +83,13 @@ export function EnquiryForm({ custom = false }: { custom?: boolean }) {
         )}
         <label className="wide">
           {custom ? "Tell us the story behind your piece" : "Your message"}
-          <textarea name="Message" required rows={5} maxLength={3000} />
+          <textarea
+            name="Message"
+            required
+            rows={5}
+            maxLength={3000}
+            defaultValue={piece ? `I have a question about ${piece}.\n\n` : ""}
+          />
         </label>
         <label className="consent wide">
           <input type="checkbox" name="Enquiry consent" value="Agreed" required />

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/members")({
             access and invitations will appear when confirmed.
           </p>
           <div className="actions">
-            <a className="button light" href="https://i6z1cd-5f.myshopify.com/account">
+            <a className="button light" href="https://natashathefounder.myshopify.com/account">
               Sign in with Shopify ↗
             </a>
             <a className="text-link" href="/contact?topic=membership">
@@ -49,8 +49,8 @@ export const Route = createFileRoute("/members")({
           <p className="eyebrow">THE PRIVATE EDIT</p>
           <h2>Something set aside.</h2>
           <p>
-            No private product releases or discount codes are currently confirmed here. We will not
-            invent an offer to fill the space.
+            The next private edit is still taking shape. Ask to hear when there is something to
+            share.
           </p>
         </article>
         <article>
@@ -68,7 +68,7 @@ export const Route = createFileRoute("/members")({
             Manage your customer profile and orders through your Shopify account. Contact us to
             discuss your interests and communication preferences.
           </p>
-          <a className="text-link" href="https://i6z1cd-5f.myshopify.com/account">
+          <a className="text-link" href="https://natashathefounder.myshopify.com/account">
             Profile & orders ↗
           </a>
         </article>
