@@ -1,3 +1,4 @@
+import { StudioPhotograph } from "@/components/studio-photograph";
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 import { getCatalogue } from "@/lib/commerce/catalogue";
@@ -211,15 +212,21 @@ function Home() {
           </a>
         </div>
       </section>
-      <section className="founder-note section">
-        <p className="eyebrow">04 — From Natasha</p>
-        <h2>
-          Jewellery, perspective and the freedom to become more fully <i>yourself.</i>
-        </h2>
+      <section className="founder-studio section">
+        <StudioPhotograph />
         <div>
-          <span className="signature">Natasha</span>
+          <p className="eyebrow">Natasha Collins — The Founder</p>
+          <h2>
+            A point of view.
+            <br />
+            <i>A pair of hands.</i>
+          </h2>
+          <p>
+            Jewellery designer, founder, coach and storyteller. In the studio, Natasha brings ideas
+            into focus — sketch by sketch, conversation by conversation.
+          </p>
           <a className="text-link" href="/pages/natasha">
-            Meet the mind behind the house <ArrowUpRight size={16} />
+            Meet Natasha <ArrowUpRight size={16} />
           </a>
         </div>
       </section>

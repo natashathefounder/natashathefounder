@@ -1,3 +1,4 @@
+import { StudioPhotograph } from "@/components/studio-photograph";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { stories } from "@/lib/editorial";
 import { pageHead } from "@/lib/seo";
@@ -15,11 +16,13 @@ export const Route = createFileRoute("/pages/$slug")({
     ),
   component: function Page() {
     const s = Route.useLoaderData();
+    const { slug } = Route.useParams();
     return (
       <main className="editorial">
         <p className="eyebrow">{s.eyebrow}</p>
         <h1>{s.title}</h1>
         <p className="lede">{s.lede}</p>
+        {slug === "natasha" && <StudioPhotograph />}
         {s.sections.map(([title, body]) => (
           <section key={title}>
             <h2>{title}</h2>

@@ -1,3 +1,4 @@
+import { StudioPhotograph } from "@/components/studio-photograph";
 import { createFileRoute } from "@tanstack/react-router";
 import { EnquiryForm } from "@/components/enquiry-form";
 import { pageHead } from "@/lib/seo";
@@ -22,6 +23,9 @@ export const Route = createFileRoute("/custom")({
           a conversation.
         </p>
       </header>
+      <div className="custom-studio section">
+        <StudioPhotograph kind="sketching" />
+      </div>
       <section className="section feature-grid">
         <article>
           <p className="eyebrow">01 / THE CONVERSATION</p>

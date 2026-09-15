@@ -1890,3 +1890,53 @@ img {
     padding: 20px 12px;
   }
 }
+
+.studio-photograph {
+  margin: 0;
+  max-width: 420px;
+  width: 100%;
+}
+.studio-photograph img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.studio-photograph figcaption {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  padding: 14px 0;
+}
+.founder-studio {
+  display: grid;
+  grid-template-columns: minmax(0, 420px) 1fr;
+  gap: 8%;
+  align-items: center;
+  background: #e9e2d8;
+}
+.founder-studio h2 {
+  font-size: clamp(44px, 5vw, 76px);
+  line-height: 1.05;
+  margin: 20px 0;
+}
+.founder-studio p {
+  max-width: 42ch;
+}
+.founder-studio .text-link {
+  margin-top: 24px;
+}
+.editorial > .studio-photograph {
+  margin: 32px auto;
+}
+.custom-studio .studio-photograph {
+  max-width: 540px;
+  margin: 0 auto;
+}
+@media (max-width: 700px) {
+  .founder-studio {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .founder-studio .studio-photograph {
+    margin: auto;
+  }
+}
