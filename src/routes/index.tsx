@@ -19,7 +19,7 @@ function Home() {
   const { products, collections, unavailable } = Route.useLoaderData();
   return (
     <main>
-      <section className="hero">
+      <section className="hero campaign-hero">
         <div className="hero-copy">
           <p className="eyebrow">THE HOUSE OF NATASHA · ORA JEWELLERY</p>
           <h1>
@@ -43,13 +43,13 @@ function Home() {
         </div>
         <figure className="hero-portrait">
           <img
-            src="/media/portrait-1080.webp"
-            srcSet="/media/portrait-640.webp 640w, /media/portrait-1080.webp 1080w"
-            sizes="(max-width:700px) 100vw, 53vw"
-            width="1080"
-            height="1440"
+            src="https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=1440"
+            srcSet="https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=640 640w, https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=1440 1440w, https://cdn.shopify.com/s/files/1/1032/8047/6489/files/ora-original-site-campaign.jpg?v=1789462631&width=2048 2048w"
+            sizes="(max-width:700px) 100vw, 62vw"
+            width="2048"
+            height="1140"
             fetchPriority="high"
-            alt="Editorial portrait of a woman in a checked dress against warm timber"
+            alt="Model wearing a charm necklace, hoop earrings and two bracelets with a white shirt"
           />
           <figcaption>INDIVIDUALITY IS THE SIGNATURE.</figcaption>
         </figure>

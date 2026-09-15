@@ -1643,3 +1643,41 @@ img {
     min-height: 390px;
   }
 }
+
+.hero.campaign-hero {
+  grid-template-columns: 38% 62%;
+  min-height: 560px;
+}
+.campaign-hero .hero-copy {
+  padding: 45px 9% 40px 14%;
+}
+.campaign-hero .hero-copy h1 {
+  font-size: clamp(56px, 6vw, 100px);
+}
+.campaign-hero .hero-portrait {
+  min-height: 560px;
+}
+.campaign-hero .hero-portrait img {
+  object-position: 50% 50%;
+}
+@media (max-width: 700px) {
+  .hero.campaign-hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+  .campaign-hero .hero-copy {
+    padding: 30px 6% 34px;
+  }
+  .campaign-hero .hero-copy h1 {
+    font-size: clamp(4.2rem, 17vw, 6rem);
+  }
+  .campaign-hero .hero-portrait {
+    min-height: 0;
+    aspect-ratio: 2048/1140;
+  }
+  .campaign-hero .hero-portrait img {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+}
