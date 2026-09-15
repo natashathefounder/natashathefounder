@@ -3,6 +3,7 @@ import { Menu, X, ShoppingBag, ArrowUpRight, Search, Gem, UserRound } from "luci
 import * as Dialog from "@radix-ui/react-dialog";
 import { BagProvider, useBag, PredictiveSearch } from "./commerce";
 import { ShoppingGuide } from "./shopping-guide";
+import { InstagramProfile } from "./instagram-profile";
 const links = [
   ["The collection", "/shop"],
   ["The charm guide", "/stack"],
@@ -104,6 +105,7 @@ function Shell({ children }: { children: ReactNode }) {
           Bag ({cart?.totalQuantity || 0})
         </button>
       </nav>
+      <InstagramProfile />
       <section className="newsletter section">
         <div>
           <p className="eyebrow">Letters from the house</p>
