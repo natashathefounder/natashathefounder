@@ -19,6 +19,9 @@ export const Route = createFileRoute("/")({
     ]);
     return {
       ...catalogue,
+      products: catalogue.products.filter((product) =>
+        /ring|bracelet|necklace|earring|charm|bangle|chain|pendant|hoop/i.test(product.productType),
+      ),
       categoryImages: edits.map(
         (edit) => edit.products.find((p) => p.featuredImage)?.featuredImage,
       ),
