@@ -1,7 +1,15 @@
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, ArrowLeft, X, Compass, Link2, Circle, Layers } from "lucide-react";
-import { picksForKind, picksForSystem, productPath, type CharmSystem, type GuideKind } from "@/lib/guide-picks";
+import {
+  picksForKind,
+  picksForSystem,
+  productPath,
+  systemFit,
+  type CharmSystem,
+  type GuideIntent,
+  type GuideKind,
+} from "@/lib/guide-picks";
 import type { Product } from "@/lib/products";
 
 export const charmSystems = [
@@ -45,9 +53,12 @@ export function ShoppingGuide({
   const [step, setStep] = useState<"start" | "existing" | "new" | "details">("start");
   const [system, setSystem] = useState(0);
   const [kind, setKind] = useState<GuideKind | null>(null);
+  const [intent, setIntent] = useState<GuideIntent>("self");
   const contact = `/contact?topic=Product+guidance${product ? `&piece=${encodeURIComponent(product)}` : ""}`;
-  const systemPicks = picksForSystem(charmSystems[system].id);
-  const kindPicks = kind ? picksForKind(kind) : [];
+  const systemId = charmSystems[system].id;
+  const fit = systemFit[systemId];
+  const systemPicks = picksForSystem(systemId, intent);
+  const kindPicks = kind ? picksForKind(kind, intent) : [];
 
   return (
     <Dialog.Root
@@ -55,6 +66,7 @@ export function ShoppingGuide({
         if (open) {
           setStep("start");
           setKind(null);
+          setIntent("self");
         }
       }}
     >
@@ -102,7 +114,7 @@ export function ShoppingGuide({
                 <button onClick={() => setStep("new")}>
                   <span className="eyebrow">02 / A FRESH START</span>
                   <strong>I’m starting something new.</strong>
-                  <span>Explore at your own pace.</span>
+                  <span>One base. Three charms.</span>
                   <ArrowUpRight />
                 </button>
                 <button onClick={() => setStep("details")}>
@@ -119,6 +131,7 @@ export function ShoppingGuide({
                   These are three different systems. Their charms are not interchangeable across all
                   chains and hoops.
                 </p>
+                <IntentTabs intent={intent} onChange={setIntent} />
                 <div className="system-tabs" role="group" aria-label="Learn about a charm system">
                   {charmSystems.map((s, i) => (
                     <button key={s.name} aria-pressed={system === i} onClick={() => setSystem(i)}>
@@ -130,11 +143,17 @@ export function ShoppingGuide({
                   <p className="eyebrow">{charmSystems[system].name}</p>
                   <h3>{charmSystems[system].description}</h3>
                   <p>{charmSystems[system].detail}</p>
+                  <p>
+                    <strong>Fit.</strong> {fit.limit}
+                  </p>
+                  <p>
+                    <strong>Mixing.</strong> {fit.mix}
+                  </p>
                 </div>
                 <PieceRow items={systemPicks} />
                 <p className="guide-note">
-                  These are pieces from the house in that family. They do not confirm a fit with the
-                  jewellery you already own.
+                  These pieces sit in that family. They do not confirm a fit with jewellery you already
+                  own.
                 </p>
                 <a className="button full" href={contact}>
                   Ask about my combination <ArrowUpRight size={16} />
@@ -143,7 +162,11 @@ export function ShoppingGuide({
             ) : step === "new" ? (
               <>
                 <h3>Choose a beginning.</h3>
-                <p>One piece is enough to start. Pick a family, then open two or three real pieces.</p>
+                <p>
+                  Start with one base and three charms. Odd numbers hold the eye. Add more when the
+                  story needs it.
+                </p>
+                <IntentTabs intent={intent} onChange={setIntent} />
                 <div className="system-tabs" role="group" aria-label="Choose a family">
                   {kinds.map((k) => (
                     <button key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>
@@ -154,7 +177,7 @@ export function ShoppingGuide({
                 {kindPicks.length > 0 ? <PieceRow items={kindPicks} /> : null}
                 <div className="guide-destinations">
                   <a href="/stack">
-                    Explore the charm guide <ArrowUpRight />
+                    Compose one base + three charms <ArrowUpRight />
                   </a>
                   <a href="/shop?q=chain">
                     Look at chains <ArrowUpRight />
@@ -201,6 +224,19 @@ export function ShoppingGuide({
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
+  );
+}
+
+function IntentTabs({ intent, onChange }: { intent: GuideIntent; onChange: (v: GuideIntent) => void }) {
+  return (
+    <div className="system-tabs" role="group" aria-label="Who is this for">
+      <button aria-pressed={intent === "self"} onClick={() => onChange("self")}>
+        For me
+      </button>
+      <button aria-pressed={intent === "gift"} onClick={() => onChange("gift")}>
+        A gift
+      </button>
+    </div>
   );
 }
 
