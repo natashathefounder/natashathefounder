@@ -1,9 +1,12 @@
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, ArrowLeft, X, Compass, Link2, Circle, Layers } from "lucide-react";
+import { picksForKind, picksForSystem, productPath, type CharmSystem, type GuideKind } from "@/lib/guide-picks";
+import type { Product } from "@/lib/products";
 
 export const charmSystems = [
   {
+    id: "glide" as CharmSystem,
     name: "Glide & Stack",
     icon: Layers,
     description: "For slider chains with silicone-lined balls.",
@@ -11,6 +14,7 @@ export const charmSystems = [
       "Start with the slider chain you own or are considering. The charm opening and the chain’s fittings both matter.",
   },
   {
+    id: "hoop" as CharmSystem,
     name: "Hoop charms",
     icon: Circle,
     description: "For hoops up to 2.5 mm wide.",
@@ -18,6 +22,7 @@ export const charmSystems = [
       "Check the width of your hoop and the charm’s attachment. A similar appearance does not establish a fit.",
   },
   {
+    id: "clip" as CharmSystem,
     name: "Clip charms",
     icon: Link2,
     description: "For curve chains or suitable chain links.",
@@ -25,6 +30,9 @@ export const charmSystems = [
       "Check the opening of the clip against the exact link you want to attach it to, including paperclip-style links.",
   },
 ];
+
+const kinds: GuideKind[] = ["Charms", "Earrings", "Bracelets", "Necklaces", "Rings"];
+
 export function ShoppingGuide({
   label = "Help me choose",
   product,
@@ -36,11 +44,18 @@ export function ShoppingGuide({
 }) {
   const [step, setStep] = useState<"start" | "existing" | "new" | "details">("start");
   const [system, setSystem] = useState(0);
+  const [kind, setKind] = useState<GuideKind | null>(null);
   const contact = `/contact?topic=Product+guidance${product ? `&piece=${encodeURIComponent(product)}` : ""}`;
+  const systemPicks = picksForSystem(charmSystems[system].id);
+  const kindPicks = kind ? picksForKind(kind) : [];
+
   return (
     <Dialog.Root
       onOpenChange={(open) => {
-        if (open) setStep("start");
+        if (open) {
+          setStep("start");
+          setKind(null);
+        }
       }}
     >
       <Dialog.Trigger className={className}>
@@ -116,9 +131,10 @@ export function ShoppingGuide({
                   <h3>{charmSystems[system].description}</h3>
                   <p>{charmSystems[system].detail}</p>
                 </div>
+                <PieceRow items={systemPicks} />
                 <p className="guide-note">
-                  This explains the systems, not a confirmed match for an individual product. Share
-                  the names or links of both pieces if you’re unsure.
+                  These are pieces from the house in that family. They do not confirm a fit with the
+                  jewellery you already own.
                 </p>
                 <a className="button full" href={contact}>
                   Ask about my combination <ArrowUpRight size={16} />
@@ -127,10 +143,15 @@ export function ShoppingGuide({
             ) : step === "new" ? (
               <>
                 <h3>Choose a beginning.</h3>
-                <p>
-                  One piece is enough to start. Explore the shapes you’re drawn to; check the
-                  connection before combining charms with a base.
-                </p>
+                <p>One piece is enough to start. Pick a family, then open two or three real pieces.</p>
+                <div className="system-tabs" role="group" aria-label="Choose a family">
+                  {kinds.map((k) => (
+                    <button key={k} aria-pressed={kind === k} onClick={() => setKind(k)}>
+                      {k}
+                    </button>
+                  ))}
+                </div>
+                {kindPicks.length > 0 ? <PieceRow items={kindPicks} /> : null}
                 <div className="guide-destinations">
                   <a href="/stack">
                     Explore the charm guide <ArrowUpRight />
@@ -146,7 +167,7 @@ export function ShoppingGuide({
                   </a>
                 </div>
                 <p className="guide-note">
-                  Browse links show catalogue search results. They do not certify compatibility.
+                  Links open this site’s catalogue. They do not certify compatibility.
                 </p>
               </>
             ) : (
@@ -182,6 +203,21 @@ export function ShoppingGuide({
     </Dialog.Root>
   );
 }
+
+function PieceRow({ items }: { items: Product[] }) {
+  if (!items.length) return null;
+  return (
+    <div className="guide-destinations" style={{ marginTop: "1.25rem" }}>
+      {items.map((p) => (
+        <a key={p.id} href={productPath(p.id)}>
+          {p.name}
+          <ArrowUpRight />
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export function DiscoveryEntry() {
   return (
     <section className="discovery-entry" aria-labelledby="discovery-title">
