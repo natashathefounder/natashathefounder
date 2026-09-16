@@ -50,7 +50,7 @@
         this.replaceChildren();
         this.append(
           el("p", "GLIDE & STACK / YOUR PERSONAL EDIT", "eyebrow"),
-          el("h2", "Build something that is yours."),
+          el(this.dataset.mode === "shopify" ? "h1" : "h2", "Build something that is yours."),
         );
         this.append(
           el(
