@@ -180,17 +180,8 @@ function Home() {
         </div>
       </section>
       <section className="perspective-split">
-        <div className="atmosphere">
-          <img
-            src="/media/atmosphere.webp"
-            srcSet="/media/atmosphere-768.webp 768w, /media/atmosphere.webp 1536w"
-            sizes="(max-width:700px) 100vw, 50vw"
-            width="1536"
-            height="1024"
-            loading="lazy"
-            alt="Atmospheric still life of dark stone and oxblood fabric"
-          />
-          <span className="eyebrow">FORM. FEELING. PERSPECTIVE.</span>
+        <div className="philosophy-studio">
+          <StudioPhotograph kind="sketching" />
         </div>
         <div className="section">
           <p className="eyebrow">03 — The philosophy</p>

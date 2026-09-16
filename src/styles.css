@@ -1940,3 +1940,22 @@ img {
     margin: auto;
   }
 }
+
+.philosophy-studio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36px;
+  background: #e9e2d8;
+}
+.philosophy-studio .studio-photograph {
+  max-width: 540px;
+}
+.philosophy-studio figcaption {
+  color: #211b18;
+}
+@media (max-width: 700px) {
+  .philosophy-studio {
+    padding: 24px 6%;
+  }
+}
