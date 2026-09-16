@@ -1,9 +1,10 @@
 import { StudioPhotograph } from "@/components/studio-photograph";
-import { createFileRoute, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { stories } from "@/lib/editorial";
 import { pageHead } from "@/lib/seo";
 export const Route = createFileRoute("/pages/$slug")({
   loader: ({ params }) => {
+    if (params.slug === "build-your-charm-stack") throw redirect({ to: "/stack", statusCode: 301 });
     const story = stories[params.slug];
     if (!story) throw notFound();
     return story;

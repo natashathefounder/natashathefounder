@@ -2,6 +2,10 @@ import { z } from "zod";
 import { shopify } from "./shopify.server";
 import * as Q from "./queries";
 import type { Cart } from "./types";
+const stackLine = z.object({
+  variantId: z.string().regex(/^gid:\/\/shopify\/ProductVariant\/\d+$/),
+  quantity: z.number().int().min(1).max(10),
+});
 const schema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("add"),
@@ -15,6 +19,7 @@ const schema = z.discriminatedUnion("action", [
   }),
   z.object({ action: z.literal("remove"), lineId: z.string().min(1).max(500) }),
   z.object({ action: z.literal("reset") }),
+  z.object({ action: z.literal("addStack"), lines: z.array(stackLine).min(2).max(16) }),
 ]);
 export function safeCheckout(url: string) {
   const u = new URL(url);
@@ -68,14 +73,18 @@ export async function handleCart(request: Request) {
       return respond({ cart: null });
     }
     let query: string, variables: Record<string, unknown>;
-    if (data.action === "add") {
+    if (data.action === "add" || data.action === "addStack") {
+      const lines =
+        data.action === "add"
+          ? [{ merchandiseId: data.variantId, quantity: data.quantity }]
+          : data.lines.map((l) => ({ merchandiseId: l.variantId, quantity: l.quantity }));
       query = id ? Q.CART_ADD : Q.CART_CREATE;
       variables = id
-        ? { id, lines: [{ merchandiseId: data.variantId, quantity: data.quantity }] }
+        ? { id, lines }
         : {
             input: {
               buyerIdentity: { countryCode: "GB" },
-              lines: [{ merchandiseId: data.variantId, quantity: data.quantity }],
+              lines,
             },
           };
     } else {
@@ -91,8 +100,21 @@ export async function handleCart(request: Request) {
       Record<string, { cart: Cart | null; userErrors: { message: string }[] }>
     >(query, variables);
     const value = Object.values(result)[0];
-    if (value.userErrors.length)
-      return respond({ error: value.userErrors.map((e) => e.message).join(" ") }, 422);
+    if (value.userErrors.length) {
+      if (value.cart) {
+        value.cart.checkoutUrl = safeCheckout(value.cart.checkoutUrl);
+        save(value.cart.id);
+      }
+      return respond(
+        {
+          cart: value.cart,
+          error:
+            value.userErrors.map((e) => e.message).join(" ") +
+            " Check your bag before adding again.",
+        },
+        422,
+      );
+    }
     if (!value.cart)
       return respond({ error: "Your bag could not be found. Start a new bag to continue." }, 409);
     value.cart.checkoutUrl = safeCheckout(value.cart.checkoutUrl);

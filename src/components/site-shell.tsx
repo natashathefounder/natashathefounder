@@ -6,7 +6,7 @@ import { ShoppingGuide } from "./shopping-guide";
 import { InstagramProfile } from "./instagram-profile";
 const links = [
   ["The collection", "/shop"],
-  ["The charm guide", "/stack"],
+  ["Build your charm stack", "/stack"],
   ["Natasha", "/pages/natasha"],
   ["The private salon", "/members"],
 ];
@@ -130,7 +130,7 @@ function Shell({ children }: { children: ReactNode }) {
           <div>
             <p className="eyebrow">The collection</p>
             <a href="/shop">All jewellery</a>
-            <a href="/stack">The charm guide</a>
+            <a href="/stack">Build your charm stack</a>
             <a href="/custom">Something personal</a>
             <a href="/cart">Your bag</a>
           </div>

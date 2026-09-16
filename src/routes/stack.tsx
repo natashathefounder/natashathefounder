@@ -1,16 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowUpRight, ArrowDown } from "lucide-react";
 import { ShoppingGuide, charmSystems } from "@/components/shopping-guide";
-import { ProductGrid, CommerceEmpty, Loading } from "@/components/commerce";
-import { getCatalogue } from "@/lib/commerce/catalogue";
+import { Loading } from "@/components/commerce";
+import { getStackCatalogue } from "@/lib/commerce/stack-catalogue";
+import { StackBuilder } from "@/components/stack-builder";
 import { pageHead } from "@/lib/seo";
 export const Route = createFileRoute("/stack")({
-  loader: () => getCatalogue({ data: { q: "charm", sort: "featured" } }),
+  loader: () => getStackCatalogue(),
   pendingComponent: Loading,
   head: () =>
     pageHead(
-      "The charm guide — ORA Jewellery",
-      "Find your starting point. Understand ORA’s three charm systems and explore the current charm collection.",
+      "Build your charm stack — ORA Jewellery",
+      "Choose a slider chain, select Glide & Stack charms and add your personal combination to your Shopify bag.",
       "/stack",
     ),
   component: CharmGuide,
@@ -21,7 +22,7 @@ function CharmGuide() {
     <main>
       <section className="charm-hero">
         <div>
-          <p className="eyebrow">ORA / THE CHARM GUIDE</p>
+          <p className="eyebrow">ORA / BUILD YOUR CHARM STACK</p>
           <h1>
             A story.
             <br />
@@ -36,7 +37,10 @@ function CharmGuide() {
             own eye.
           </p>
           <div className="actions">
-            <ShoppingGuide className="button light" />
+            <a className="button light" href="#build-stack">
+              Build my stack <ArrowDown size={16} />
+            </a>
+            <ShoppingGuide />
             <a className="text-link" href="#systems">
               Meet the three systems <ArrowDown size={16} />
             </a>
@@ -57,6 +61,12 @@ function CharmGuide() {
           </p>
         </div>
       </section>
+      <StackBuilder products={data.products} />
+      {data.incomplete && (
+        <p className="section" role="status">
+          Some pieces could not be loaded. Refresh to try again.
+        </p>
+      )}
       <section className="section" id="systems">
         <div className="section-heading">
           <div>
@@ -121,26 +131,6 @@ function CharmGuide() {
             </div>
           </li>
         </ol>
-      </section>
-      <section className="section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">FOLLOW YOUR OWN EYE</p>
-            <h2>A few possibilities.</h2>
-          </div>
-          <a className="text-link" href="/shop?q=charm">
-            Explore all charms <ArrowUpRight size={16} />
-          </a>
-        </div>
-        <p className="small muted">
-          From the current charm catalogue. This edit is inspiration, not a set of confirmed
-          compatible pieces.
-        </p>
-        {data.products.length ? (
-          <ProductGrid products={data.products.slice(0, 4)} />
-        ) : (
-          <CommerceEmpty unavailable={data.unavailable} />
-        )}
       </section>
     </main>
   );
