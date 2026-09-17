@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Menu, X, ShoppingBag, ArrowUpRight, Search, Gem, UserRound } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { BagProvider, useBag, PredictiveSearch } from "./commerce";
-import { ShoppingGuide } from "./shopping-guide";
+import { DressUp } from "./dress-up";
 import { InstagramProfile } from "./instagram-profile";
 const links = [
   ["The collection", "/shop"],
@@ -33,7 +33,7 @@ function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="header-actions">
-          <ShoppingGuide className="desktop-guide guide-trigger" />
+          <DressUp className="desktop-guide guide-trigger" />
           <button
             className="icon-button"
             aria-label="Search"
@@ -95,7 +95,7 @@ function Shell({ children }: { children: ReactNode }) {
           <Gem size={19} />
           Shop
         </a>
-        <ShoppingGuide label="Guide" className="mobile-guide" />
+        <DressUp label="Make" className="mobile-guide" />
         <a href="/members">
           <UserRound size={19} />
           Salon
