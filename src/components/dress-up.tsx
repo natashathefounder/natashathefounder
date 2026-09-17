@@ -3,6 +3,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, ArrowLeft, X, Sparkles } from "lucide-react";
 import { products, type Product } from "@/lib/products";
 import { productPath } from "@/lib/guide-picks";
+import { getProduct } from "@/lib/commerce/catalogue";
+import { useBag } from "@/components/commerce";
 
 const bases = products.filter((p) => p.category === "Necklaces" || p.category === "Bracelets");
 const charms = products.filter((p) => p.category === "Charms");
@@ -77,9 +79,12 @@ export function DressUp({
   label?: string;
   className?: string;
 }) {
+  const { reload, setOpen } = useBag();
   const [step, setStep] = useState<"base" | "charms" | "done">("base");
   const [base, setBase] = useState<Product | null>(null);
   const [picked, setPicked] = useState<Product[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   function toggle(c: Product) {
     setPicked((list) => {
@@ -89,6 +94,38 @@ export function DressUp({
     });
   }
 
+  async function buyAll() {
+    if (!base || picked.length < 1) return;
+    setBusy(true);
+    setError("");
+    try {
+      const rows = await Promise.all([base, ...picked].map((p) => getProduct({ data: p.id })));
+      const lines = rows.flatMap((row) => {
+        const variant =
+          row.product?.variants.nodes.find((v) => v.availableForSale) ||
+          row.product?.variants.nodes[0];
+        return variant ? [{ variantId: variant.id, quantity: 1 }] : [];
+      });
+      if (lines.length < 2) {
+        setError("Those pieces could not be added together. Open each product to buy.");
+        return;
+      }
+      const response = await fetch("/api/bag", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "addStack", lines }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || "The bag could not take this set.");
+      reload();
+      setOpen(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "The bag could not take this set.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Dialog.Root
       onOpenChange={(open) => {
@@ -96,6 +133,7 @@ export function DressUp({
           setStep("base");
           setBase(null);
           setPicked([]);
+          setError("");
         }
       }}
     >
@@ -139,7 +177,8 @@ export function DressUp({
           <Dialog.Description>
             {step === "base" && "Pick the chain you can see. Charms come after."}
             {step === "charms" && `On ${base?.name ?? "your base"}. Tap a picture to hook it on.`}
-            {step === "done" && "This is the set. Open a picture to buy that piece."}
+            {step === "done" &&
+              "The bag will hold the necklace and every charm you picked. Take any off there."}
           </Dialog.Description>
 
           {step !== "base" && (
@@ -227,16 +266,19 @@ export function DressUp({
                       {c.name} — charm <ArrowUpRight />
                     </a>
                   ))}
-                  <a href="/stack">
-                    Open the full stack builder <ArrowUpRight />
-                  </a>
                 </div>
+                {error && (
+                  <p className="guide-note" role="alert">
+                    {error}
+                  </p>
+                )}
                 <p className="guide-note">
-                  Pictures are the real products. The overlay is a preview, not a studio composite.
+                  Everything you chose goes in the bag. Remove a piece there if you change your mind.
                 </p>
-                <a className="button full" href={productPath(base.id)}>
-                  Go on — get it and purchase <ArrowUpRight size={16} />
-                </a>
+                <button className="button full" disabled={busy} onClick={() => void buyAll()}>
+                  {busy ? "Adding your set…" : "Go on — get it and purchase"}
+                  <ArrowUpRight size={16} />
+                </button>
               </>
             )}
           </div>
