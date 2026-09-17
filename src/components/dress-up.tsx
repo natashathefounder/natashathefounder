@@ -234,8 +234,8 @@ export function DressUp({
                 <p className="guide-note">
                   Pictures are the real products. The overlay is a preview, not a studio composite.
                 </p>
-                <a className="button full" href="/contact?topic=Product+guidance">
-                  Ask if this combination fits <ArrowUpRight size={16} />
+                <a className="button full" href={productPath(base.id)}>
+                  Go on — get it and purchase <ArrowUpRight size={16} />
                 </a>
               </>
             )}
