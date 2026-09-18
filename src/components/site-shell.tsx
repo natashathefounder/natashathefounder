@@ -3,6 +3,7 @@ import { Menu, X, ShoppingBag, ArrowUpRight, Search, Gem, UserRound } from "luci
 import * as Dialog from "@radix-ui/react-dialog";
 import { BagProvider, useBag, PredictiveSearch } from "./commerce";
 import { DressUp } from "./dress-up";
+import { LetterGame } from "./letter-game";
 import { InstagramProfile } from "./instagram-profile";
 const links = [
   ["The collection", "/shop"],
@@ -19,7 +20,7 @@ function Shell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <div className="announcement">
-        ORA JEWELLERY <span>·</span> ROOTED IN PERSPECTIVE. WORN YOUR WAY.
+        ORA JEWELLERY <span>·</span> PLAY FOR 10% OFF WITH LETTER CHARMS
       </div>
       <header className="site-header">
         <a className="wordmark" href="/" aria-label="Natasha The Founder home">
@@ -33,6 +34,7 @@ function Shell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="header-actions">
+          <LetterGame className="desktop-guide guide-trigger" />
           <DressUp className="desktop-guide guide-trigger" />
           <button
             className="icon-button"
@@ -96,10 +98,7 @@ function Shell({ children }: { children: ReactNode }) {
           Shop
         </a>
         <DressUp label="Make" className="mobile-guide" />
-        <a href="/members">
-          <UserRound size={19} />
-          Salon
-        </a>
+        <LetterGame label="Play" className="mobile-guide" />
         <button onClick={() => setOpen(true)}>
           <ShoppingBag size={19} />
           Bag ({cart?.totalQuantity || 0})
