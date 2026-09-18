@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, ArrowLeft, X, Sparkles } from "lucide-react";
-import { products, type Product } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { productPath } from "@/lib/guide-picks";
 import { getProduct } from "@/lib/commerce/catalogue";
 import { useBag } from "@/components/commerce";
+import { glideCharms, sliderBases } from "@/lib/dress-up-kit";
 
-const bases = products.filter((p) => p.category === "Necklaces" || p.category === "Bracelets");
-const charms = products.filter((p) => p.category === "Charms");
+type Spot = { x: number; y: number };
 
 function Photo({ product, tall }: { product: Product; tall?: boolean }) {
   return (
@@ -25,49 +25,93 @@ function Photo({ product, tall }: { product: Product; tall?: boolean }) {
         alt=""
         width={480}
         height={480}
-        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          mixBlendMode: "multiply",
+        }}
       />
     </span>
   );
 }
 
-function Stage({ base, charms: on }: { base: Product; charms: Product[] }) {
+function Stage({
+  base,
+  charms,
+  spots,
+  onMove,
+}: {
+  base: Product;
+  charms: Product[];
+  spots: Record<string, Spot>;
+  onMove: (id: string, spot: Spot) => void;
+}) {
+  const stage = useRef<HTMLDivElement>(null);
+
+  function place(id: string, clientX: number, clientY: number) {
+    const box = stage.current?.getBoundingClientRect();
+    if (!box) return;
+    const x = Math.min(88, Math.max(4, ((clientX - box.left) / box.width) * 100));
+    const y = Math.min(88, Math.max(4, ((clientY - box.top) / box.height) * 100));
+    onMove(id, { x, y });
+  }
+
   return (
     <div
+      ref={stage}
       style={{
         position: "relative",
         background: "#e4ddd3",
         aspectRatio: "4 / 5",
         margin: "12px 0 20px",
         overflow: "hidden",
+        touchAction: "none",
       }}
-      aria-label={`${base.name} with ${on.length} charm${on.length === 1 ? "" : "s"}`}
+      aria-label={`${base.name} with ${charms.length} charm${charms.length === 1 ? "" : "s"}. Drag a charm to place it.`}
     >
       <img
         src={base.image}
         alt={base.name}
         width={640}
         height={800}
-        style={{ width: "100%", height: "100%", objectFit: "contain" }}
+        draggable={false}
+        style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
       />
-      {on.map((c, i) => (
-        <img
-          key={c.id}
-          src={c.image}
-          alt={c.name}
-          width={200}
-          height={200}
-          style={{
-            position: "absolute",
-            width: "28%",
-            height: "auto",
-            left: `${18 + i * 22}%`,
-            bottom: `${10 + (i % 2) * 8}%`,
-            objectFit: "contain",
-            filter: "drop-shadow(0 6px 10px #0004)",
-          }}
-        />
-      ))}
+      {charms.map((c, i) => {
+        const spot = spots[c.id] ?? { x: 18 + i * 22, y: 72 - (i % 2) * 8 };
+        return (
+          <img
+            key={c.id}
+            src={c.image}
+            alt={c.name}
+            width={160}
+            height={160}
+            draggable={false}
+            onPointerDown={(e) => {
+              (e.target as HTMLElement).setPointerCapture(e.pointerId);
+              place(c.id, e.clientX, e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (e.buttons === 0) return;
+              place(c.id, e.clientX, e.clientY);
+            }}
+            style={{
+              position: "absolute",
+              width: "26%",
+              height: "auto",
+              left: `${spot.x}%`,
+              top: `${spot.y}%`,
+              transform: "translate(-50%, -50%)",
+              objectFit: "contain",
+              mixBlendMode: "multiply",
+              cursor: "grab",
+              touchAction: "none",
+              userSelect: "none",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -83,6 +127,7 @@ export function DressUp({
   const [step, setStep] = useState<"base" | "charms" | "done">("base");
   const [base, setBase] = useState<Product | null>(null);
   const [picked, setPicked] = useState<Product[]>([]);
+  const [spots, setSpots] = useState<Record<string, Spot>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -133,6 +178,7 @@ export function DressUp({
           setStep("base");
           setBase(null);
           setPicked([]);
+          setSpots({});
           setError("");
         }
       }}
@@ -146,7 +192,7 @@ export function DressUp({
         <Dialog.Overlay className="dialog-shade" />
         <Dialog.Content className="shopping-guide">
           <header>
-            <span className="eyebrow">ORA / DRESS-UP</span>
+            <span className="eyebrow">ORA / GLIDE & STACK</span>
             <Dialog.Close className="icon-button" aria-label="Close">
               <X />
             </Dialog.Close>
@@ -154,16 +200,16 @@ export function DressUp({
           <Dialog.Title>
             {step === "base" && (
               <>
-                First, the necklace.
+                Start with the slider chain.
                 <br />
-                <i>Then the charms.</i>
+                <i>Only this chain takes Glide charms.</i>
               </>
             )}
             {step === "charms" && (
               <>
-                Now hook on charms.
+                Slide a charm on.
                 <br />
-                <i>Up to three.</i>
+                <i>Drag it where it should sit.</i>
               </>
             )}
             {step === "done" && (
@@ -175,10 +221,11 @@ export function DressUp({
             )}
           </Dialog.Title>
           <Dialog.Description>
-            {step === "base" && "Pick the chain you can see. Charms come after."}
-            {step === "charms" && `On ${base?.name ?? "your base"}. Tap a picture to hook it on.`}
-            {step === "done" &&
-              "The bag will hold the necklace and every charm you picked. Take any off there."}
+            {step === "base" &&
+              "Glide & Stack charms lock on the ORA slider chain only — not Bone, Motion or clip chains."}
+            {step === "charms" &&
+              "White around the charm is knocked out. Drag it along the chain."}
+            {step === "done" && "Necklace and charms go in the bag together. Remove any you do not want."}
           </Dialog.Description>
 
           {step !== "base" && (
@@ -196,7 +243,7 @@ export function DressUp({
                 className="guide-choices"
                 style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
               >
-                {bases.map((p) => (
+                {sliderBases.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => {
@@ -206,9 +253,8 @@ export function DressUp({
                     style={{ textAlign: "left" }}
                   >
                     <Photo product={p} tall />
-                    <span className="eyebrow">{p.category}</span>
+                    <span className="eyebrow">Slider chain</span>
                     <strong>{p.name}</strong>
-                    <span>{p.price != null ? `£${p.price}` : "Ask"}</span>
                   </button>
                 ))}
               </div>
@@ -216,15 +262,20 @@ export function DressUp({
 
             {step === "charms" && base && (
               <>
-                <Stage base={base} charms={picked} />
+                <Stage
+                  base={base}
+                  charms={picked}
+                  spots={spots}
+                  onMove={(id, spot) => setSpots((s) => ({ ...s, [id]: spot }))}
+                />
                 <p className="guide-piece">
-                  Base <strong>{base.name}</strong> · {picked.length}/3 charms
+                  Base <strong>{base.name}</strong> · {picked.length}/3 charms · drag to place
                 </p>
                 <div
                   className="guide-choices"
                   style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
                 >
-                  {charms.map((c) => {
+                  {glideCharms.map((c) => {
                     const on = picked.some((x) => x.id === c.id);
                     return (
                       <button
@@ -239,7 +290,6 @@ export function DressUp({
                         <Photo product={c} />
                         <span className="eyebrow">{on ? "On the chain" : "Charm"}</span>
                         <strong>{c.name}</strong>
-                        <span>{c.price != null ? `£${c.price}` : "Ask"}</span>
                       </button>
                     );
                   })}
@@ -256,14 +306,19 @@ export function DressUp({
 
             {step === "done" && base && (
               <>
-                <Stage base={base} charms={picked} />
+                <Stage
+                  base={base}
+                  charms={picked}
+                  spots={spots}
+                  onMove={(id, spot) => setSpots((s) => ({ ...s, [id]: spot }))}
+                />
                 <div className="guide-destinations">
                   <a href={productPath(base.id)}>
-                    {base.name} — the necklace <ArrowUpRight />
+                    {base.name} <ArrowUpRight />
                   </a>
                   {picked.map((c) => (
                     <a key={c.id} href={productPath(c.id)}>
-                      {c.name} — charm <ArrowUpRight />
+                      {c.name} <ArrowUpRight />
                     </a>
                   ))}
                 </div>
@@ -272,9 +327,6 @@ export function DressUp({
                     {error}
                   </p>
                 )}
-                <p className="guide-note">
-                  Everything you chose goes in the bag. Remove a piece there if you change your mind.
-                </p>
                 <button className="button full" disabled={busy} onClick={() => void buyAll()}>
                   {busy ? "Adding your set…" : "Go on — get it and purchase"}
                   <ArrowUpRight size={16} />
@@ -282,7 +334,7 @@ export function DressUp({
               </>
             )}
           </div>
-          <p className="guide-signoff">Necklace first. Charms second. Done.</p>
+          <p className="guide-signoff">Slider chain first. Charms second. Drag to place.</p>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
