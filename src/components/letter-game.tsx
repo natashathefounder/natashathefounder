@@ -1,16 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Sparkles, X } from "lucide-react";
 
-const WORDS = ["CHARM", "STACK", "GLIDE", "PEARL", "CHAIN", "HEART", "STORY", "CROWN", "HOUSE", "SLIDE"];
+const WORDS = ["GOLD", "LOVE", "RING", "HOOP", "LOCK", "LINK", "WISH", "GIFT", "OATH", "BOND"];
 const TRIES = 4;
-const LEN = 5;
+const LEN = 4;
 const CODE = "PLAYORA10";
-const KEY = "ora-letter-game";
+const KEY = "ora-letter-game-v2";
+const CHARM =
+  "https://cdn.shopify.com/s/files/1/0680/7725/6998/files/49_563db8ca-d132-430a-a579-42a4f9639bb0.png?v=1772531042";
 
-function todayWord() {
-  const day = Math.floor(Date.now() / 86400000);
-  return WORDS[day % WORDS.length];
+function pick(avoid?: string) {
+  const pool = WORDS.filter((w) => w !== avoid);
+  return pool[Math.floor(Math.random() * pool.length)] || WORDS[0];
 }
 
 function score(guess: string, word: string) {
@@ -33,12 +35,43 @@ function score(guess: string, word: string) {
   return marks;
 }
 
-const tile: Record<string, string> = {
-  hit: "#171513",
-  near: "#715732",
-  miss: "#c9c0b3",
-  empty: "#eee9df",
-};
+function Charm({ letter, mark }: { letter: string; mark: "hit" | "near" | "miss" | "empty" }) {
+  const ring =
+    mark === "hit" ? "#171513" : mark === "near" ? "#715732" : mark === "miss" ? "#b9afa2" : "#c9c0b3";
+  return (
+    <span
+      style={{
+        position: "relative",
+        aspectRatio: "1",
+        display: "grid",
+        placeItems: "center",
+        borderRadius: "50%",
+        overflow: "hidden",
+        border: `3px solid ${ring}`,
+        background: "#e4ddd3",
+      }}
+    >
+      <img
+        src={CHARM}
+        alt=""
+        width={120}
+        height={120}
+        style={{ width: "100%", height: "100%", objectFit: "cover", mixBlendMode: "multiply" }}
+      />
+      <span
+        style={{
+          position: "absolute",
+          fontFamily: "var(--font-serif)",
+          fontSize: 22,
+          color: "#171513",
+          textShadow: "0 1px 0 #fff8",
+        }}
+      >
+        {letter}
+      </span>
+    </span>
+  );
+}
 
 export function LetterGame({
   label = "Play for 10%",
@@ -47,7 +80,7 @@ export function LetterGame({
   label?: string;
   className?: string;
 }) {
-  const word = useMemo(todayWord, []);
+  const [word, setWord] = useState(WORDS[0]);
   const [open, setOpen] = useState(false);
   const [guesses, setGuesses] = useState<string[]>([]);
   const [draft, setDraft] = useState("");
@@ -56,38 +89,26 @@ export function LetterGame({
   const [note, setNote] = useState("");
 
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(KEY) || "{}") as {
-        day?: number;
-        guesses?: string[];
-        won?: boolean;
-      };
-      const day = Math.floor(Date.now() / 86400000);
-      if (saved.day === day && saved.guesses) {
-        setGuesses(saved.guesses);
-        setWon(!!saved.won);
-        setLost(!saved.won && saved.guesses.length >= TRIES);
-      } else if (!saved.day) {
-        const t = setTimeout(() => setOpen(true), 1200);
-        return () => clearTimeout(t);
-      }
-    } catch {
-      /* first visit */
-    }
+    setWord(pick());
+    const t = setTimeout(() => setOpen(true), 1200);
+    return () => clearTimeout(t);
   }, []);
 
-  function persist(next: string[], win: boolean) {
-    localStorage.setItem(
-      KEY,
-      JSON.stringify({ day: Math.floor(Date.now() / 86400000), guesses: next, won: win }),
-    );
+  function replay() {
+    setWord(pick(word));
+    setGuesses([]);
+    setDraft("");
+    setWon(false);
+    setLost(false);
+    setNote("");
+    localStorage.removeItem(KEY);
   }
 
   function submit() {
     if (won || lost) return;
     const guess = draft.toUpperCase().replace(/[^A-Z]/g, "");
     if (guess.length !== LEN) {
-      setNote("Five letters — like five charms on a chain.");
+      setNote("Four letters — four charms on the chain.");
       return;
     }
     const next = [...guesses, guess];
@@ -97,7 +118,6 @@ export function LetterGame({
     setNote("");
     if (win) setWon(true);
     else if (next.length >= TRIES) setLost(true);
-    persist(next, win);
   }
 
   const rows = [...guesses, ...(won || lost ? [] : [draft])];
@@ -119,61 +139,42 @@ export function LetterGame({
             </Dialog.Close>
           </header>
           <Dialog.Title>
-            Five letters.
+            Four charms.
             <br />
             <i>Four goes.</i>
           </Dialog.Title>
           <Dialog.Description>
-            Guess today’s word. Each letter is a charm. Get it right and checkout takes {CODE} for
-            10% off.
+            Spell today’s word with letter charms. Win and checkout takes {CODE} for 10% off.
           </Dialog.Description>
 
           <div className="guide-body">
-            <div style={{ display: "grid", gap: 8, margin: "18px 0" }}>
+            <div style={{ display: "grid", gap: 10, margin: "18px 0" }}>
               {rows.slice(0, TRIES).map((row, r) => {
                 const locked = r < guesses.length;
                 const marks = locked ? score(guesses[r], word) : [];
                 return (
-                  <div key={r} style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8 }}>
-                    {Array.from({ length: LEN }).map((_, i) => {
-                      const mark = locked ? marks[i] : "empty";
-                      const bg = tile[mark];
-                      const color = mark === "empty" || mark === "miss" ? "#171513" : "#eee9df";
-                      return (
-                        <span
-                          key={i}
-                          style={{
-                            aspectRatio: "1",
-                            display: "grid",
-                            placeItems: "center",
-                            background: bg,
-                            border: "1px solid #171513",
-                            fontFamily: "var(--font-serif)",
-                            fontSize: 28,
-                            color,
-                          }}
-                        >
-                          {(row[i] || "").toUpperCase()}
-                        </span>
-                      );
-                    })}
+                  <div key={r} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+                    {Array.from({ length: LEN }).map((_, i) => (
+                      <Charm
+                        key={i}
+                        letter={(row[i] || "").toUpperCase()}
+                        mark={locked ? marks[i] : "empty"}
+                      />
+                    ))}
                   </div>
                 );
               })}
             </div>
 
             {won && (
-              <>
-                <p>
-                  That word is yours. Use <strong>{CODE}</strong> at Shopify checkout.
-                </p>
-                <a className="button full" href="/stack">
-                  Make the necklace with those letters
-                </a>
-              </>
+              <p>
+                That word is yours. Use <strong>{CODE}</strong> at Shopify checkout.
+              </p>
             )}
             {lost && !won && (
-              <p className="guide-note">Four goes are up. Come back tomorrow for a new word.</p>
+              <p className="guide-note">
+                Four goes are up. The word was <strong>{word}</strong>.
+              </p>
             )}
             {!won && !lost && (
               <form
@@ -183,10 +184,10 @@ export function LetterGame({
                 }}
               >
                 <label>
-                  <span className="eyebrow">Your guess</span>
+                  <span className="eyebrow">Your four letters</span>
                   <input
                     value={draft}
-                    maxLength={5}
+                    maxLength={4}
                     autoCapitalize="characters"
                     autoComplete="off"
                     onChange={(e) => setDraft(e.target.value.toUpperCase())}
@@ -199,9 +200,15 @@ export function LetterGame({
                 </button>
               </form>
             )}
+            <button className="button full" type="button" onClick={replay} style={{ marginTop: 12 }}>
+              Play again
+            </button>
+            <a className="button full" href="/products/letter-charms" style={{ marginTop: 8 }}>
+              Shop letter charms
+            </a>
             <p className="guide-note">
-              Dark tile = right letter, right place. Gold = right letter, other place. Grey = not in
-              the word.
+              Dark ring = right place. Gold ring = right letter, other place. Pale ring = not in the
+              word.
             </p>
           </div>
         </Dialog.Content>
