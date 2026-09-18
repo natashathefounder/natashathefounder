@@ -3,7 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowUpRight, ArrowLeft, X, Sparkles } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { productPath } from "@/lib/guide-picks";
-import { getProduct } from "@/lib/commerce/catalogue";
+import { getLookLines } from "@/lib/commerce/look-lines";
 import { useBag } from "@/components/commerce";
 import { glideCharms, sliderBases } from "@/lib/dress-up-kit";
 
@@ -144,28 +144,34 @@ export function DressUp({
     setBusy(true);
     setError("");
     try {
-      const rows = await Promise.all([base, ...picked].map((p) => getProduct({ data: p.id })));
-      const lines = rows.flatMap((row) => {
-        const variant =
-          row.product?.variants.nodes.find((v) => v.availableForSale) ||
-          row.product?.variants.nodes[0];
-        return variant ? [{ variantId: variant.id, quantity: 1 }] : [];
-      });
-      if (lines.length < 2) {
+      const look = await Promise.race([
+        getLookLines({ data: [base.id, ...picked.map((p) => p.id)] }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("That took too long. Open a piece and add it from there.")), 12000),
+        ),
+      ]);
+      if (look.lines.length < 2) {
         setError("Those pieces could not be added together. Open each product to buy.");
         return;
       }
       const response = await fetch("/api/bag", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "addStack", lines }),
+        body: JSON.stringify({ action: "addStack", lines: look.lines }),
+        signal: AbortSignal.timeout(12000),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "The bag could not take this set.");
       reload();
       setOpen(true);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "The bag could not take this set.");
+      setError(
+        e instanceof Error
+          ? e.name === "TimeoutError"
+            ? "That took too long. Open a piece and add it from there."
+            : e.message
+          : "The bag could not take this set.",
+      );
     } finally {
       setBusy(false);
     }
@@ -223,8 +229,7 @@ export function DressUp({
           <Dialog.Description>
             {step === "base" &&
               "Glide & Stack charms lock on the ORA slider chain only — not Bone, Motion or clip chains."}
-            {step === "charms" &&
-              "White around the charm is knocked out. Drag it along the chain."}
+            {step === "charms" && "White around the charm is knocked out. Drag it along the chain."}
             {step === "done" && "Necklace and charms go in the bag together. Remove any you do not want."}
           </Dialog.Description>
 
