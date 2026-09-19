@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { Sparkles, X } from "lucide-react";
 import { getLookLines } from "@/lib/commerce/look-lines";
 import { useBag } from "@/components/commerce";
 import { productPath } from "@/lib/guide-picks";
+import { glideCharms } from "@/lib/dress-up-kit";
 
 const WORDS = ["GOLD", "LOVE", "RING", "HOOP", "LOCK", "LINK", "WISH", "GIFT", "OATH", "BOND"];
 const TRIES = 4;
@@ -41,11 +42,7 @@ const SET = [
   },
 ];
 
-const spots = [
-  { x: 28, y: 62 },
-  { x: 50, y: 70 },
-  { x: 72, y: 62 },
-];
+type Spot = { x: number; y: number };
 
 function pick(avoid?: string) {
   const pool = WORDS.filter((w) => w !== avoid);
@@ -88,45 +85,77 @@ function payUrl(checkout: string) {
   return u.href;
 }
 
-function NecklaceView() {
-  const chain = SET[0];
-  const charms = SET.slice(1);
+function NecklaceView({
+  charms,
+  spots,
+  onMove,
+}: {
+  charms: { id: string; name: string; image: string }[];
+  spots: Record<string, Spot>;
+  onMove: (id: string, spot: Spot) => void;
+}) {
+  const stage = useRef<HTMLDivElement>(null);
+  function place(id: string, clientX: number, clientY: number) {
+    const box = stage.current?.getBoundingClientRect();
+    if (!box) return;
+    onMove(id, {
+      x: Math.min(88, Math.max(4, ((clientX - box.left) / box.width) * 100)),
+      y: Math.min(88, Math.max(4, ((clientY - box.top) / box.height) * 100)),
+    });
+  }
   return (
     <div
+      ref={stage}
       style={{
         position: "relative",
         background: "#e4ddd3",
         aspectRatio: "4 / 5",
         margin: "12px 0 16px",
         overflow: "hidden",
+        touchAction: "none",
       }}
     >
       <img
-        src={chain.image}
-        alt={chain.name}
+        src={SET[0].image}
+        alt={SET[0].name}
         width={640}
         height={800}
+        draggable={false}
         style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
       />
-      {charms.map((c, i) => (
-        <img
-          key={c.id}
-          src={c.image}
-          alt={c.name}
-          width={120}
-          height={120}
-          style={{
-            position: "absolute",
-            width: "22%",
-            height: "auto",
-            left: `${spots[i].x}%`,
-            top: `${spots[i].y}%`,
-            transform: "translate(-50%, -50%)",
-            objectFit: "contain",
-            mixBlendMode: "multiply",
-          }}
-        />
-      ))}
+      {charms.map((c, i) => {
+        const spot = spots[c.id] ?? { x: 22 + i * 18, y: 68 - (i % 2) * 8 };
+        return (
+          <img
+            key={c.id}
+            src={c.image}
+            alt={c.name}
+            width={120}
+            height={120}
+            draggable={false}
+            onPointerDown={(e) => {
+              (e.target as HTMLElement).setPointerCapture(e.pointerId);
+              place(c.id, e.clientX, e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (e.buttons === 0) return;
+              place(c.id, e.clientX, e.clientY);
+            }}
+            style={{
+              position: "absolute",
+              width: "22%",
+              height: "auto",
+              left: `${spot.x}%`,
+              top: `${spot.y}%`,
+              transform: "translate(-50%, -50%)",
+              objectFit: "contain",
+              mixBlendMode: "multiply",
+              cursor: "grab",
+              touchAction: "none",
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -214,7 +243,16 @@ export function LetterGame({
   const [busy, setBusy] = useState(false);
   const [pay, setPay] = useState("");
   const [showNecklace, setShowNecklace] = useState(false);
+  const [extras, setExtras] = useState<string[]>([]);
+  const [spots, setSpots] = useState<Record<string, Spot>>({});
   const lock = kept(guesses, word);
+
+  const onChain = [
+    ...SET.slice(1),
+    ...glideCharms
+      .filter((c) => extras.includes(c.id) && !SET.some((s) => s.id === c.id))
+      .map((c) => ({ id: c.id, name: c.name, image: c.image })),
+  ];
 
   useEffect(() => {
     setWord(pick());
@@ -231,6 +269,8 @@ export function LetterGame({
     setNote("");
     setPay("");
     setShowNecklace(false);
+    setExtras([]);
+    setSpots({});
   }
 
   function submit() {
@@ -254,8 +294,9 @@ export function LetterGame({
     setBusy(true);
     setNote("");
     try {
+      const handles = [SET[0].id, ...onChain.map((c) => c.id)];
       const look = await Promise.race([
-        getLookLines({ data: SET.map((p) => p.id) }),
+        getLookLines({ data: handles }),
         new Promise<never>((_, reject) =>
           setTimeout(() => reject(new Error("That took too long. Open a piece and add it from there.")), 12000),
         ),
@@ -299,9 +340,9 @@ export function LetterGame({
           <Dialog.Title>
             {won ? (
               <>
-                Your necklace.
+                Because you won!
                 <br />
-                <i>Look, then pay.</i>
+                <i>Drag the charms. Add more. 20% off.</i>
               </>
             ) : (
               <>
@@ -313,7 +354,7 @@ export function LetterGame({
           </Dialog.Title>
           <Dialog.Description>
             {won
-              ? `Slider necklace with three charms. ${CODE} applies at payment.`
+              ? `Move each charm on the chain. Add extras if you like. ${CODE} still applies because you won.`
               : "Box 1 is the slider necklace. The other three are charms. Right letters stay."}
           </Dialog.Description>
 
@@ -322,12 +363,11 @@ export function LetterGame({
               {showNecklace ? "Hide the necklace" : "Show the necklace"}
             </button>
             {showNecklace && (
-              <>
-                <NecklaceView />
-                <a className="button full" href={productPath(SET[0].id)}>
-                  Open the necklace page
-                </a>
-              </>
+              <NecklaceView
+                charms={onChain}
+                spots={spots}
+                onMove={(id, spot) => setSpots((s) => ({ ...s, [id]: spot }))}
+              />
             )}
 
             {!won && (
@@ -375,31 +415,50 @@ export function LetterGame({
 
             {won && (
               <>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "16px 0" }}>
-                  {SET.map((p) => (
-                    <a key={p.id} href={productPath(p.id)} style={{ textDecoration: "none" }}>
-                      <span style={{ display: "block", background: "#e4ddd3", aspectRatio: "1", overflow: "hidden" }}>
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          width={320}
-                          height={320}
-                          style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
-                        />
-                      </span>
-                      <span className="eyebrow">{p.kind}</span>
-                      <strong style={{ display: "block" }}>{p.name}</strong>
-                    </a>
-                  ))}
+                <p className="guide-note">Drag a charm to sit where you want it on the chain.</p>
+                <p className="eyebrow" style={{ marginTop: 16 }}>
+                  Add more — because you won
+                </p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                  {glideCharms
+                    .filter((c) => !SET.some((s) => s.id === c.id))
+                    .slice(0, 8)
+                    .map((c) => {
+                      const on = extras.includes(c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() =>
+                            setExtras((list) => (on ? list.filter((id) => id !== c.id) : [...list, c.id]))
+                          }
+                          style={{ textAlign: "left", outline: on ? "2px solid #171513" : undefined }}
+                        >
+                          <span style={{ display: "block", background: "#e4ddd3", aspectRatio: "1", overflow: "hidden" }}>
+                            <img
+                              src={c.image}
+                              alt=""
+                              style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
+                            />
+                          </span>
+                          <span className="eyebrow">{on ? "On the chain" : "Add"}</span>
+                          <strong>{c.name}</strong>
+                        </button>
+                      );
+                    })}
                 </div>
-                <button className="button full" type="button" disabled={busy} onClick={() => void checkoutSet()}>
-                  {busy ? "Opening checkout…" : "Check out and pay — 20% off"}
+                <button className="button full" type="button" disabled={busy} onClick={() => void checkoutSet()} style={{ marginTop: 16 }}>
+                  {busy ? "Opening checkout…" : "Check out and pay — because you won, 20% off"}
                 </button>
                 {pay ? (
                   <a className="button full" href={pay} style={{ marginTop: 8 }}>
                     Continue to payment
                   </a>
                 ) : null}
+                <a className="text-link" href={productPath(SET[0].id)}>
+                  Open the necklace page
+                </a>
               </>
             )}
             {lost && !won && (
