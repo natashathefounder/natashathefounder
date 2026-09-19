@@ -17,33 +17,67 @@ export const Route = createFileRoute("/api/prize")({
         const email = String(body.email || "")
           .trim()
           .toLowerCase();
-        if (!/^[^
-\s@]+@[^
-\s@]+\.[^
-\s@]+$/.test(email) || email.length > 254) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) {
           return Response.json({ error: "Enter a real email address." }, { status: 400 });
         }
-        console.info("[prize]", email, body.word || "", (body.extras || []).join(","));
-        const hook = process.env.PRIZE_NOTIFY_URL;
-        if (hook) {
-          try {
-            await fetch(hook, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                email,
-                word: body.word || "",
-                extras: body.extras || [],
-                source: "letter-game",
-                at: new Date().toISOString(),
-              }),
-              signal: AbortSignal.timeout(4000),
-            });
-          } catch {
-            /* optional notify */
+
+        const key = process.env.KLAVIYO_PRIVATE_API_KEY;
+        const list = process.env.KLAVIYO_LIST_ID;
+        const revision = process.env.KLAVIYO_REVISION || "2024-10-15";
+
+        if (key && list) {
+          const klaviyo = await fetch("https://a.klaviyo.com/api/profile-subscription-bulk-create-jobs/", {
+            method: "POST",
+            headers: {
+              Authorization: `Klaviyo-API-Key ${key}`,
+              revision,
+              accept: "application/vnd.api+json",
+              "content-type": "application/vnd.api+json",
+            },
+            body: JSON.stringify({
+              data: {
+                type: "profile-subscription-bulk-create-job",
+                attributes: {
+                  custom_source: "ORA letter game",
+                  profiles: {
+                    data: [
+                      {
+                        type: "profile",
+                        attributes: {
+                          email,
+                          properties: {
+                            prize_word: body.word || "",
+                            prize_extras: (body.extras || []).join(", "),
+                            prize_code: "PLAYORA20",
+                          },
+                          subscriptions: {
+                            email: { marketing: { consent: "SUBSCRIBED" } },
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+                relationships: {
+                  list: { data: { type: "list", id: list } },
+                },
+              },
+            }),
+            signal: AbortSignal.timeout(8000),
+          });
+          if (!klaviyo.ok) {
+            const detail = await klaviyo.text();
+            console.error("[prize] Klaviyo", klaviyo.status, detail.slice(0, 400));
+            return Response.json(
+              { error: "Klaviyo could not take that address. Try checkout anyway." },
+              { status: 502 },
+            );
           }
+        } else {
+          console.info("[prize] no Klaviyo keys", email);
         }
-        return Response.json({ ok: true });
+
+        return Response.json({ ok: true, klaviyo: Boolean(key && list) });
       },
     },
   },
