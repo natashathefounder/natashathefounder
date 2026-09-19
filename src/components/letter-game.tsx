@@ -245,6 +245,8 @@ export function LetterGame({
   const [showNecklace, setShowNecklace] = useState(false);
   const [extras, setExtras] = useState<string[]>([]);
   const [spots, setSpots] = useState<Record<string, Spot>>({});
+  const [email, setEmail] = useState("");
+  const [consent, setConsent] = useState(false);
   const lock = kept(guesses, word);
 
   const onChain = [
@@ -291,9 +293,29 @@ export function LetterGame({
   }
 
   async function checkoutSet() {
+    const clean = email.trim().toLowerCase();
+    if (!/[^\s@]+@[^\s@]+\.[^\s@]+/.test(clean)) {
+      setNote("Enter your email first — because you won.");
+      return;
+    }
+    if (!consent) {
+      setNote("Tick the box so we can keep this email with your prize.");
+      return;
+    }
     setBusy(true);
     setNote("");
     try {
+      await fetch("/api/prize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: clean, word, extras }),
+        signal: AbortSignal.timeout(8000),
+      }).catch(() => null);
+      try {
+        localStorage.setItem("ora-prize-email", clean);
+      } catch {
+        /* optional */
+      }
       const handles = [SET[0].id, ...onChain.map((c) => c.id)];
       const look = await Promise.race([
         getLookLines({ data: handles }),
@@ -342,7 +364,7 @@ export function LetterGame({
               <>
                 Because you won!
                 <br />
-                <i>Drag the charms. Add more. 20% off.</i>
+                <i>Leave your email, then pay.</i>
               </>
             ) : (
               <>
@@ -354,7 +376,7 @@ export function LetterGame({
           </Dialog.Title>
           <Dialog.Description>
             {won
-              ? `Move each charm on the chain. Add extras if you like. ${CODE} still applies because you won.`
+              ? `Your email keeps the 20% code with you. Then check out with ${CODE}.`
               : "Box 1 is the slider necklace. The other three are charms. Right letters stay."}
           </Dialog.Description>
 
@@ -415,6 +437,24 @@ export function LetterGame({
 
             {won && (
               <>
+                <label style={{ display: "grid", gap: 6, margin: "16px 0 8px" }}>
+                  <span className="eyebrow">Your email — because you won</span>
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@email.com"
+                  />
+                </label>
+                <label className="consent" style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                  <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                  <span className="small">
+                    You may use this email for this prize and to reply about the order.{" "}
+                    <a href="/pages/privacy">Privacy</a>.
+                  </span>
+                </label>
                 <p className="guide-note">Drag a charm to sit where you want it on the chain.</p>
                 <p className="eyebrow" style={{ marginTop: 16 }}>
                   Add more — because you won
