@@ -3,6 +3,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Sparkles, X } from "lucide-react";
 import { getLookLines } from "@/lib/commerce/look-lines";
 import { useBag } from "@/components/commerce";
+import { productPath } from "@/lib/guide-picks";
 
 const WORDS = ["GOLD", "LOVE", "RING", "HOOP", "LOCK", "LINK", "WISH", "GIFT", "OATH", "BOND"];
 const TRIES = 4;
@@ -73,6 +74,12 @@ function kept(guesses: string[], word: string) {
     });
   }
   return lock;
+}
+
+function payUrl(checkout: string) {
+  const u = new URL(checkout);
+  u.searchParams.set("discount", CODE);
+  return u.href;
 }
 
 function Tile({
@@ -156,6 +163,7 @@ export function LetterGame({
   const [lost, setLost] = useState(false);
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  const [pay, setPay] = useState("");
   const lock = kept(guesses, word);
 
   useEffect(() => {
@@ -171,6 +179,7 @@ export function LetterGame({
     setWon(false);
     setLost(false);
     setNote("");
+    setPay("");
   }
 
   function submit() {
@@ -188,14 +197,14 @@ export function LetterGame({
     if (guess !== word) setSlots(kept(next, word).map((ch) => ch || ""));
   }
 
-  async function buySet() {
+  async function checkoutSet() {
     setBusy(true);
     setNote("");
     try {
       const look = await Promise.race([
         getLookLines({ data: SET.map((p) => p.id) }),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("That took too long. Open the pieces from the list.")), 12000),
+          setTimeout(() => reject(new Error("That took too long. Open a piece and add it from there.")), 12000),
         ),
       ]);
       if (look.lines.length < 2) throw new Error("The set could not be added. Open each piece to buy.");
@@ -207,16 +216,13 @@ export function LetterGame({
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error || "The bag could not take this set.");
-      try {
-        sessionStorage.setItem("ora-discount", CODE);
-      } catch {
-        /* optional */
-      }
+      const url = body.cart?.checkoutUrl ? payUrl(body.cart.checkoutUrl) : "";
+      setPay(url);
       reload();
-      setBagOpen(true);
-      setNote(`Bag holds the necklace and three charms. Enter ${CODE} at checkout for 20% off.`);
+      if (url) window.location.assign(url);
+      else setBagOpen(true);
     } catch (e) {
-      setNote(e instanceof Error ? e.message : "The bag could not take this set.");
+      setNote(e instanceof Error ? e.message : "Checkout could not open.");
     } finally {
       setBusy(false);
     }
@@ -238,74 +244,102 @@ export function LetterGame({
             </Dialog.Close>
           </header>
           <Dialog.Title>
-            Four pieces.
-            <br />
-            <i>20% if you spell it.</i>
+            {won ? (
+              <>
+                Your set.
+                <br />
+                <i>Check out and pay.</i>
+              </>
+            ) : (
+              <>
+                Four pieces.
+                <br />
+                <i>20% if you spell it.</i>
+              </>
+            )}
           </Dialog.Title>
           <Dialog.Description>
-            Box 1 is the slider necklace. The other three are charms. Right letters stay. Win and buy
-            this set with {CODE}.
+            {won
+              ? `Necklace plus three charms. ${CODE} is added on the payment page.`
+              : "Box 1 is the slider necklace. The other three are charms. Right letters stay."}
           </Dialog.Description>
 
           <div className="guide-body">
-            <div style={{ display: "grid", gap: 10, margin: "18px 0" }}>
-              {guesses.map((g) => {
-                const marks = score(g, word);
-                return (
-                  <div key={g} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-                    {g.split("").map((ch, i) => (
-                      <Tile key={i} letter={ch} mark={marks[i]} col={i} />
-                    ))}
+            {!won && (
+              <div style={{ display: "grid", gap: 10, margin: "18px 0" }}>
+                {guesses.map((g) => {
+                  const marks = score(g, word);
+                  return (
+                    <div key={g} style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+                      {g.split("").map((ch, i) => (
+                        <Tile key={i} letter={ch} mark={marks[i]} col={i} />
+                      ))}
+                    </div>
+                  );
+                })}
+                {!lost && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+                    {slots.map((ch, i) => {
+                      const frozen = !!lock[i];
+                      return (
+                        <label key={i} style={{ display: "grid", gap: 6 }}>
+                          <Tile letter={frozen ? lock[i] : ch} mark={frozen ? "hit" : "empty"} col={i} />
+                          <input
+                            value={frozen ? lock[i] : ch}
+                            maxLength={1}
+                            disabled={frozen}
+                            autoCapitalize="characters"
+                            onChange={(e) => {
+                              const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
+                              setSlots((s) => s.map((x, j) => (j === i ? v : x)));
+                            }}
+                            style={{
+                              width: "100%",
+                              textAlign: "center",
+                              textTransform: "uppercase",
+                              opacity: frozen ? 0.55 : 1,
+                            }}
+                          />
+                        </label>
+                      );
+                    })}
                   </div>
-                );
-              })}
-              {!won && !lost && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
-                  {slots.map((ch, i) => {
-                    const frozen = !!lock[i];
-                    return (
-                      <label key={i} style={{ display: "grid", gap: 6 }}>
-                        <Tile letter={frozen ? lock[i] : ch} mark={frozen ? "hit" : "empty"} col={i} />
-                        <input
-                          value={frozen ? lock[i] : ch}
-                          maxLength={1}
-                          disabled={frozen}
-                          autoCapitalize="characters"
-                          onChange={(e) => {
-                            const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(-1);
-                            setSlots((s) => s.map((x, j) => (j === i ? v : x)));
-                          }}
-                          style={{ width: "100%", textAlign: "center", textTransform: "uppercase", opacity: frozen ? 0.55 : 1 }}
-                        />
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             {won && (
               <>
-                <p>
-                  The set is a slider necklace and three charms. Checkout code <strong>{CODE}</strong> —
-                  20% off.
-                </p>
-                <ol className="guide-note" style={{ paddingLeft: 18 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, margin: "16px 0" }}>
                   {SET.map((p) => (
-                    <li key={p.id}>
-                      {p.kind}: {p.name}
-                    </li>
+                    <a key={p.id} href={productPath(p.id)} style={{ textDecoration: "none" }}>
+                      <span style={{ display: "block", background: "#e4ddd3", aspectRatio: "1", overflow: "hidden" }}>
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          width={320}
+                          height={320}
+                          style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
+                        />
+                      </span>
+                      <span className="eyebrow">{p.kind}</span>
+                      <strong style={{ display: "block" }}>{p.name}</strong>
+                    </a>
                   ))}
-                </ol>
-                <button className="button full" type="button" disabled={busy} onClick={() => void buySet()}>
-                  {busy ? "Adding the set…" : "Buy necklace + 3 charms — 20% off"}
+                </div>
+                <button className="button full" type="button" disabled={busy} onClick={() => void checkoutSet()}>
+                  {busy ? "Opening checkout…" : "Check out and pay — 20% off"}
                 </button>
+                {pay ? (
+                  <a className="button full" href={pay} style={{ marginTop: 8 }}>
+                    Continue to payment
+                  </a>
+                ) : null}
               </>
             )}
             {lost && !won && (
               <p className="guide-note">
-                Four goes are up. The word was <strong>{word}</strong>. Play again, or buy the set
-                without the extra off.
+                Four goes are up. The word was <strong>{word}</strong>.
               </p>
             )}
             {note && <p className="guide-note">{note}</p>}
