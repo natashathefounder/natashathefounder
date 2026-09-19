@@ -41,6 +41,12 @@ const SET = [
   },
 ];
 
+const spots = [
+  { x: 28, y: 62 },
+  { x: 50, y: 70 },
+  { x: 72, y: 62 },
+];
+
 function pick(avoid?: string) {
   const pool = WORDS.filter((w) => w !== avoid);
   return pool[Math.floor(Math.random() * pool.length)] || WORDS[0];
@@ -80,6 +86,49 @@ function payUrl(checkout: string) {
   const u = new URL(checkout);
   u.searchParams.set("discount", CODE);
   return u.href;
+}
+
+function NecklaceView() {
+  const chain = SET[0];
+  const charms = SET.slice(1);
+  return (
+    <div
+      style={{
+        position: "relative",
+        background: "#e4ddd3",
+        aspectRatio: "4 / 5",
+        margin: "12px 0 16px",
+        overflow: "hidden",
+      }}
+    >
+      <img
+        src={chain.image}
+        alt={chain.name}
+        width={640}
+        height={800}
+        style={{ width: "100%", height: "100%", objectFit: "contain", mixBlendMode: "multiply" }}
+      />
+      {charms.map((c, i) => (
+        <img
+          key={c.id}
+          src={c.image}
+          alt={c.name}
+          width={120}
+          height={120}
+          style={{
+            position: "absolute",
+            width: "22%",
+            height: "auto",
+            left: `${spots[i].x}%`,
+            top: `${spots[i].y}%`,
+            transform: "translate(-50%, -50%)",
+            objectFit: "contain",
+            mixBlendMode: "multiply",
+          }}
+        />
+      ))}
+    </div>
+  );
 }
 
 function Tile({
@@ -164,6 +213,7 @@ export function LetterGame({
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [pay, setPay] = useState("");
+  const [showNecklace, setShowNecklace] = useState(false);
   const lock = kept(guesses, word);
 
   useEffect(() => {
@@ -180,6 +230,7 @@ export function LetterGame({
     setLost(false);
     setNote("");
     setPay("");
+    setShowNecklace(false);
   }
 
   function submit() {
@@ -191,8 +242,10 @@ export function LetterGame({
     }
     const next = [...guesses, guess];
     setGuesses(next);
-    if (guess === word) setWon(true);
-    else if (next.length >= TRIES) setLost(true);
+    if (guess === word) {
+      setWon(true);
+      setShowNecklace(true);
+    } else if (next.length >= TRIES) setLost(true);
     setNote("");
     if (guess !== word) setSlots(kept(next, word).map((ch) => ch || ""));
   }
@@ -246,9 +299,9 @@ export function LetterGame({
           <Dialog.Title>
             {won ? (
               <>
-                Your set.
+                Your necklace.
                 <br />
-                <i>Check out and pay.</i>
+                <i>Look, then pay.</i>
               </>
             ) : (
               <>
@@ -260,11 +313,23 @@ export function LetterGame({
           </Dialog.Title>
           <Dialog.Description>
             {won
-              ? `Necklace plus three charms. ${CODE} is added on the payment page.`
+              ? `Slider necklace with three charms. ${CODE} applies at payment.`
               : "Box 1 is the slider necklace. The other three are charms. Right letters stay."}
           </Dialog.Description>
 
           <div className="guide-body">
+            <button className="button full" type="button" onClick={() => setShowNecklace((v) => !v)}>
+              {showNecklace ? "Hide the necklace" : "Show the necklace"}
+            </button>
+            {showNecklace && (
+              <>
+                <NecklaceView />
+                <a className="button full" href={productPath(SET[0].id)}>
+                  Open the necklace page
+                </a>
+              </>
+            )}
+
             {!won && (
               <div style={{ display: "grid", gap: 10, margin: "18px 0" }}>
                 {guesses.map((g) => {
@@ -344,7 +409,7 @@ export function LetterGame({
             )}
             {note && <p className="guide-note">{note}</p>}
             {!won && !lost && (
-              <button className="button full" type="button" onClick={submit}>
+              <button className="button full" type="button" onClick={submit} style={{ marginTop: 12 }}>
                 Lock these charms
               </button>
             )}
